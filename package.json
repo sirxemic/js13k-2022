@@ -1,0 +1,31 @@
+{
+  "name": "js13k-2022",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "webpack serve",
+    "build": "node --experimental-json-modules build.js"
+  },
+  "author": "sirxemic",
+  "license": "MIT",
+  "devDependencies": {
+    "@luma.gl/constants": "^8.2.0",
+    "advzip-bin": "^2.0.0",
+    "css-loader": "^6.2.0",
+    "google-closure-compiler": "^20220803.0.0",
+    "html-minifier": "^3.5.19",
+    "jszip": "^3.1.5",
+    "rollup": "^2.56.3",
+    "spglsl": "0.0.18",
+    "tempfile": "^2.0.0",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.1.0"
+  },
+  "dependencies": {
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-url": "^6.1.0"
+  }
+}

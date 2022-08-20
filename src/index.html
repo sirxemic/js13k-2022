@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
+<title>Beyonder</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: system-ui;
+    font-weight: 900;
+    color: #fff;
+    font-size: 2vw;
+    text-shadow: 0 0 0.25em #0008, 0 0 0.5em #fff;
+    cursor: default;
+  }
+  div { position: fixed; }
+  .start {
+    bottom: 3.5em;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    padding: 0.5em 0;
+    width: 5em;
+    text-align: center;
+    border-radius: 0.25em;
+    transition: all 0.2s ease
+  }
+  .start:hover {
+    text-shadow: 0 0 0.25em #fff, 0 0 0.5em #000;
+    color: #000;
+  }
+  .start.vr {
+    bottom: 0.5em;
+  }
+  .title {
+    font-size: 2em;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+</head>
+<body>
+  <canvas></canvas>
+  <div class="ui">
+    <div class="title">Beyonder</div>
+    <div class="start desktop">Start</div>
+    <div class="start vr">VR</div>
+  </div>
+
+  <script src="build.js"></script>
+</body>
+</html>
