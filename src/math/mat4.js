@@ -1,3 +1,7 @@
+export function mat4 () {
+  return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1])
+}
+
 export function mulVecByMat(out, m, v) {
   out[0] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3] * v[3];
   out[1] = m[4] * v[0] + m[5] * v[1] + m[6] * v[2] + m[7] * v[3];

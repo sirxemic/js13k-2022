@@ -47,6 +47,11 @@ export class Shader {
     return this
   }
 
+  set3fv (name, xyz) {
+    gl.uniform3fv(gl.getUniformLocation(this.program, name), xyz)
+    return this
+  }
+
   set4f (name, x, y, z, w) {
     gl.uniform4f(gl.getUniformLocation(this.program, name), x, y, z, w)
     return this

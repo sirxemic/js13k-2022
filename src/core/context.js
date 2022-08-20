@@ -10,3 +10,4 @@ onResize()
 export const gl = canvas.getContext('webgl2', { 'xrCompatible': true })
 
 gl.enable(gl.DEPTH_TEST)
+gl.enable(gl.CULL_FACE)

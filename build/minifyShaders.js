@@ -13,7 +13,7 @@ export async function replaceAsync(string, searchValue, replacer) {
 }
 
 export async function minifyShaders (code) {
-  return await replaceAsync(code, /"\/\*glsl\*\/([\s\S]+?)"/g, async shaderCode => {
+  return await replaceAsync(code, /"\s*(\\n)?\/\*glsl\*\/([\s\S]+?)"/g, async shaderCode => {
     const s = JSON.parse(shaderCode)
 
     const precisionHeader = 'precision highp float;'
@@ -28,7 +28,8 @@ export async function minifyShaders (code) {
     })
     if (!result.valid) {
       return JSON.stringify(
-        s.substr(8)
+        s.replace(/^\/\*glsl\*\//g, '')
+          .replace(/(\#.*)\n/g, (g0, g1) => `___::${g1}::___`)
           .replace(/\/\/.+/g, '')
           .replace(/\s+/g, ' ')
           .replace(/^\s+|\s+$/g, '')
@@ -37,6 +38,8 @@ export async function minifyShaders (code) {
           .replace(/\b(\d+\.)0\b/g, (_, g1) => g1)
           .replace(/(\W) /g, (_, g1) => g1)
           .replace(/ (\W)/g, (_, g1) => g1)
+          .replace(/___::(.*?)::___/g, (_, g1) => '\n' + g1 + '\n')
+          .replace(/\s+\n/g, '\n')
       )
     } else {
       let output = result.output
