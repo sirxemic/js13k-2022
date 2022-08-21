@@ -1,30 +1,39 @@
-import { audioContext, audioDestination } from '../audio/context.js'
+import { audioContext, audioDestination, createGain } from '../audio/context.js'
 import { reverbIR } from './reverbIR.js'
 
 export let audioMix
 
 export function generateAudioMix () {
+  const musicGain = createGain()
+
+  const fxGain = createGain()
+
   const reverbNode = audioContext.createConvolver()
   reverbNode.buffer = reverbIR
 
-  reverbNode.connect(audioDestination)
+  fxGain.connect(audioDestination)
+  reverbNode.connect(musicGain).connect(audioDestination)
+
+  function setMix (mix) {
+    musicGain.gain.value = Math.sqrt(1 - mix)
+    fxGain.gain.value = Math.sqrt(mix)
+  }
+
+  setMix(0)
 
   audioMix = {
-    addChannel (node, volume, reverbSend) {
-      const generalGain = audioContext.createGain()
-      generalGain.gain.value = volume
+    addMusicChannel (node, volume, reverbSend) {
+      const generalGain = createGain(volume)
+      const sendControl = createGain(reverbSend)
 
-      const sendControl = audioContext.createGain()
-      sendControl.gain.value = reverbSend
+      node.connect(generalGain).connect(musicGain)
+      generalGain.connect(sendControl).connect(reverbNode)
+    },
 
-      // Node -> GeneralGain -> Destination
-      //                    \-> SendControl -> Reverb -> Destination
-      //
+    addFxChannel (node) {
+      node.connect(fxGain)
+    },
 
-      node.connect(generalGain)
-      generalGain.connect(audioDestination)
-      generalGain.connect(sendControl)
-      sendControl.connect(reverbNode)
-    }
+    setMix
   }
 }

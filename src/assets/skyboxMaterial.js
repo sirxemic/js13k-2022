@@ -163,9 +163,18 @@ vec3 color(vec3 rd, vec3 lp, vec4 md) {
   float cf = 0.0;
   vec3 col = vec3(0.0);
 
-  col += stars(rd, sp, sf) * (1.0 - tanh_approx(2.0*cf)) * (0.1 + min(1.0, ${uniformLife}));
-  col += galaxy(rd, sp, sf) * (0.1 + min(1.0, ${uniformLife}));
-  col += sky(rd, sp, lp, cf) * (0.1 + min(1.0, ${uniformLife}));
+  float fra = fract(${uniformTime});
+  float life = ${uniformLife} + 0.1 * (
+    fra < 0.25
+      ? 1.0 - fra * 4.0
+      : fra < 0.625
+        ? 0.0
+        : 1.0 - (fra - 0.625) * 4.0
+  );
+
+  col += stars(rd, sp, sf) * (1.0 - tanh_approx(2.0*cf)) * (0.1 + min(1.0, life));
+  col += galaxy(rd, sp, sf) * (0.1 + min(1.0, life));
+  col += sky(rd, sp, lp, cf) * (0.1 + min(1.0, life));
 
   return col;
 }

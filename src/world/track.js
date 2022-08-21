@@ -14,7 +14,7 @@ import {
 
 class Track {
   constructor () {
-    this.grid = {}
+    this.grid = new Map()
     this.points = []
   }
 
@@ -22,8 +22,8 @@ class Track {
     const i = this.points.push(point) - 1
 
     const cellKey = `${Math.floor(point[0] / 15)}_${Math.floor(point[1] / 15)}_${Math.floor(point[2] / 15)}`
-    this.grid[cellKey] = this.grid[cellKey] || []
-    this.grid[cellKey].push(i)
+    this.grid.set(cellKey, this.grid.get(cellKey) || [])
+    this.grid.get(cellKey).push(i)
   }
 
   getPointsData () {
@@ -44,7 +44,7 @@ class Track {
       for (let dy = -1; dy <= 1; dy++) {
         for (let dz = -1; dz <= 1; dz++) {
           const cellKey = `${Math.floor(pos[0] / 15) + dx}_${Math.floor(pos[1] / 15) + dy}_${Math.floor(pos[2] / 15) + dz}`
-          const cell = this.grid[cellKey]
+          const cell = this.grid.get(cellKey)
           if (!cell) continue
 
           for (const i1 of cell) {
@@ -84,9 +84,9 @@ class Track {
     }
 
     const vecLength = length(result)
-    if (vecLength > 5) {
-      scale(result, result, 5 / vecLength)
-    }
+    // if (vecLength > 5) {
+    //   scale(result, result, 5 / vecLength)
+    // }
 
     return result
   }

@@ -27,3 +27,11 @@ export class EnvelopeSampler {
     return this.envelope[this.envelope.length - 1][1]
   }
 }
+
+/**
+ * Waiting for the next frame is useful for preventing the browser to hang
+ * while the assets are being generated
+ */
+export async function waitForNextFrame () {
+  await new Promise(resolve => requestAnimationFrame(resolve))
+}

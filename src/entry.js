@@ -5,6 +5,8 @@ import { desktopRig } from './rigs/DesktopRig.js'
 import { initAssets } from './initAssets.js'
 import { mainSong } from './assets/mainSong.js'
 import { audioContext } from './audio/context.js'
+import { startTime } from './world/scene.js'
+import { noiseSound } from './assets/noiseSound.js'
 
 initAssets().then(() => {
   VrLoop.onEnd = () => {
@@ -21,6 +23,8 @@ initAssets().then(() => {
     startScreen.hidden = true
     audioContext.resume()
     mainSong.start()
+    noiseSound.start()
+    startTime()
 
     desktopRig.startControls()
   }

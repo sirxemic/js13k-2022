@@ -21,7 +21,7 @@ export function kick () {
     const frequency = pitchSampler.sample(t)
     p += getFrequencyDelta(frequency)
 
-    let x = Math.sin(p * 2 * Math.PI) * 2
+    let x = Math.sin(p * 2 * Math.PI) * 1.1
     if (x < -1) x = -1
     if (x > 1) x = 1
     return Math.sin(x * Math.PI * 0.5)

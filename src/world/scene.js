@@ -8,13 +8,21 @@ import { particleMaterial } from '../assets/particleMaterial.js'
 import { mat4 } from '../math/mat4.js'
 import { addScaled, distance, vec3Normalize, length } from '../math/vec3.js'
 import { uniformLife, uniformTime } from '../core/constants.js'
-import { mainTrack, startTrack } from './track.js'
+import { startTrack, mainTrack } from './track.js'
 import { Material } from '../core/graphics/Material.js'
+import { audioMix } from '../assets/audioMix.js'
+
+let timeStarted = false
+let time = 0
+
+export function startTime () {
+  timeStarted = true
+}
 
 // <debug>
 const trackMesh = new VertexBuffer(gl.LINE_STRIP)
 trackMesh.vertexLayout([3])
-trackMesh.vertexData(startTrack.getPointsData())
+trackMesh.vertexData(mainTrack.getPointsData())
 
 const trackMaterial = new Material(`
 vec4 shader () { return vec4(1.0); }
@@ -46,13 +54,14 @@ particles.vertexLayout([3, 1, 3])
 particles.vertexData(particlesData)
 
 let life = 0
-let time = 0
 
 export function updateScene (dt) {
-  time += dt
+  if (timeStarted) {
+    time += dt * 2.5 / 4
+  }
   for (let i = 0; i < particlesCount; i++) {
     const pos = particlesData.subarray(i * particleStructSize, i * particleStructSize + 4)
-    const dir = startTrack.getDirection(pos)
+    const dir = mainTrack.getDirection(pos)
     addScaled(pos, pos, dir, 20 * dt)
     pos[3] = 20 * length(dir) / 5
     if (pos[3] < 0.01) {
@@ -71,6 +80,14 @@ export function updateScene (dt) {
   }
 
   particles.updateVertexData(particlesData)
+
+  const dir = mainTrack.getDirection(head.position)
+  let mix
+  if (length(dir) > 0.7) mix = 0
+  else {
+    mix = 1 - length(dir) / 0.7
+  }
+  audioMix.setMix(Math.max(0, Math.min(1, mix)))
 }
 
 export function renderScene () {
@@ -99,8 +116,8 @@ export function renderScene () {
   gl.depthMask(true)
 
   // <debug>
-  trackMaterial.updateCameraUniforms()
-  trackMaterial.setModel(mat4())
-  draw(trackMesh, trackMaterial)
+  // trackMaterial.updateCameraUniforms()
+  // trackMaterial.setModel(mat4())
+  // draw(trackMesh, trackMaterial)
   // </debug>
 }

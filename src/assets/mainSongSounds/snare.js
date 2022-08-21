@@ -6,10 +6,10 @@ import {
 } from '../../audio/utils.js'
 import { EnvelopeSampler } from '../../utils.js'
 
-export function snare () {
+export function snare (freq, duration, volume) {
   let ampEnvelope = [
-    [0, 1, 0.2],
-    [0.2, 1, 0.2],
+    [0, volume, 0.2],
+    [0.2, volume, 0.2],
     [1, 0],
   ]
 
@@ -22,8 +22,8 @@ export function snare () {
   function sampler (x, t) {
     const mix = mixSampler.sample(x)
     const noise = sampleNoise()
-    const fundamental = sampleSkewedSine(t * 261.63 / 4 * 3, 0.8)
-    return 0.8 * noise * (1 - mix) + fundamental * mix
+    const fundamental = sampleSkewedSine(t * 261.63 / 4 * 3, 1 - volume * 0.2)
+    return 0.8 * noise * volume * (1 - mix) + fundamental * mix
   }
 
   return applyEnvelope(generateSound(0.6, sampler), ampEnvelope)

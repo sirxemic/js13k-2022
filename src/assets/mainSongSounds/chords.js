@@ -7,15 +7,14 @@ import {
   sampleNoise
 } from '../../audio/utils.js'
 
-const volumeEnvelope = [
-  [0, 0],
-  [0.01, 0.3, 0.9],
-  [0.02, 0.15, 0.8],
-  [0.99, 0.03],
-  [1, 0]
-]
-
 export function chords (frequency, length) {
+  const volumeEnvelope = [
+    [0, 0],
+    [0.01 / length, 0.5],
+    [1 - 0.01 / length, 0.5 - 0.5 * length * 0.2],
+    [1, 0]
+  ]
+
   let p1 = Math.random()
   let p2 = Math.random()
   let p3 = Math.random()
