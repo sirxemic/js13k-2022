@@ -1,6 +1,6 @@
 import { audioMix } from './audioMix.js'
 import { audioContext, contextSampleRate } from '../audio/context.js'
-import { addNotes, addOctave, createTempBuffer, getOffsetForBar } from '../audio/musicUtils.js'
+import { addNotes, createTempBuffer, getOffsetForBar } from '../audio/musicUtils.js'
 import { trianglePluck } from './mainSongSounds/trianglePluck.js'
 import { decibelsToAmplitude } from '../audio/utils.js'
 import { detuned } from './mainSongSounds/detuned.js'
@@ -344,7 +344,6 @@ function createTrack5 () {
     [87.66, 2, 0.16],
     [87.83, 3, 0.16],
     [88, 4, 3.5],
-    [94, 3, 2],
 
     [105.5, 7, 1.5],
     [107, 6, 0.5],
@@ -366,6 +365,7 @@ function createTrack5 () {
   )
 
   const part2 = [
+    [94, 3, 2],
     [96, 2, 4],
     ...commonLead,
     [124, 11, 1.5],
@@ -416,6 +416,7 @@ function createTrack6 () {
     [91.5, 2, 0.25],
     [91.75, 1, 0.25],
     [92, 2, 2],
+    [94, -1, 2],
     [96, 0, 3],
     [99.5, 3, 0.16],
     [99.66, 4, 0.16],

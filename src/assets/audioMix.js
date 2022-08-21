@@ -6,20 +6,13 @@ export let audioMix
 export function generateAudioMix () {
   const musicGain = createGain()
 
-  const fxGain = createGain()
+  const fxGain = createGain(0)
 
   const reverbNode = audioContext.createConvolver()
   reverbNode.buffer = reverbIR
 
   fxGain.connect(audioDestination)
   reverbNode.connect(musicGain).connect(audioDestination)
-
-  function setMix (mix) {
-    musicGain.gain.value = Math.sqrt(1 - mix)
-    fxGain.gain.value = Math.sqrt(mix)
-  }
-
-  setMix(0)
 
   audioMix = {
     addMusicChannel (node, volume, reverbSend) {
@@ -34,6 +27,12 @@ export function generateAudioMix () {
       node.connect(fxGain)
     },
 
-    setMix
+    setMusicVolume (volume) {
+      musicGain.gain.value = volume
+    },
+
+    setFxVolume (volume) {
+      fxGain.gain.value = volume
+    }
   }
 }

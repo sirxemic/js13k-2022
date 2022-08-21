@@ -4,91 +4,96 @@ import {
   distance,
   dot,
   length,
-  perpendicularDistance,
+  perpendicularDistance, project,
   scale,
   subtract,
   vec3,
   vec3Lerp,
   vec3Normalize
 } from '../math/vec3.js'
+import { GridSpace } from './gridSpace.js'
+import { KdTreeSpace } from './kdTreeSpace.js'
 
 class Track {
   constructor () {
-    this.grid = new Map()
     this.points = []
   }
 
-  addPoint (point) {
-    const i = this.points.push(point) - 1
+  addPoint (position) {
+    this.points.push({ i: this.points.length, position })
+  }
 
-    const cellKey = `${Math.floor(point[0] / 15)}_${Math.floor(point[1] / 15)}_${Math.floor(point[2] / 15)}`
-    this.grid.set(cellKey, this.grid.get(cellKey) || [])
-    this.grid.get(cellKey).push(i)
+  update () {
+    this.space = new GridSpace(this.points)
   }
 
   getPointsData () {
     const result = []
     for (const point of this.points) {
       result.push(
-        point[0],
-        point[1],
-        point[2]
+        point.position[0],
+        point.position[1],
+        point.position[2]
       )
     }
     return result
   }
 
-  getDirection (pos) {
-    const result = vec3()
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dz = -1; dz <= 1; dz++) {
-          const cellKey = `${Math.floor(pos[0] / 15) + dx}_${Math.floor(pos[1] / 15) + dy}_${Math.floor(pos[2] / 15) + dz}`
-          const cell = this.grid.get(cellKey)
-          if (!cell) continue
+  getDistanceAndDirection (pos) {
+    let minDist = 1000
 
-          for (const i1 of cell) {
-            let point0 = this.points[i1 - 1]
-            let point1 = this.points[i1]
-            let point2 = this.points[i1 + 1]
+    let closest = null
 
-            let dir1
-            let dir2
+    for (const [{ i }, _] of this.space.getClosestPoints(pos, 3, 50)) {
+      let point0 = this.points[i - 1]?.position
+      let point1 = this.points[i].position
+      let point2 = this.points[i + 1]?.position
 
-            if (!point0) {
-              dir1 = dir2 = vec3Normalize(subtract(vec3(), point2, point1))
-              point0 = addScaled(vec3(), point1, dir1, -100)
-            } else  if (!point2) {
-              dir1 = dir2 = vec3Normalize(subtract(vec3(), point1, point0))
-              point2 = addScaled(vec3(), point1, dir1, 100)
-            } else {
-              dir1 = vec3Normalize(subtract(vec3(), point1, point0))
-              dir2 = vec3Normalize(subtract(vec3(), point2, point1))
-            }
+      let diff1
+      let diff2
+      let diff3 = vec3()
 
-            const dir3 = subtract(vec3(), point2, point0)
-            const toPos = subtract(vec3(), pos, point0)
-            const projection = scale(vec3(), dir3, dot(toPos, dir3) / dot(dir3, dir3))
-            const x = length(projection) / length(dir3)
+      if (!point0) {
+        diff1 = diff2 = vec3Normalize(subtract(vec3(), point2, point1))
+        point0 = addScaled(vec3(), point1, diff1, -100)
+      } else  if (!point2) {
+        diff1 = diff2 = vec3Normalize(subtract(vec3(), point1, point0))
+        point2 = addScaled(vec3(), point1, diff1, 100)
+      } else {
+        diff1 = vec3Normalize(subtract(vec3(), point1, point0))
+        diff2 = vec3Normalize(subtract(vec3(), point2, point1))
+      }
 
-            const dirToAdd = vec3Lerp(vec3(), dir1, dir2, x)
+      add(diff3, diff1, diff2)
+      scale(diff3, diff3, 0.5)
 
-            const y1 = 1 / Math.max(1, perpendicularDistance(dir1, subtract(vec3(), pos, point0)))
-            const y2 = 1 / Math.max(1, perpendicularDistance(dir2, subtract(vec3(), pos, point1)))
+      const projection1 = project(vec3(), diff1, subtract(vec3(), pos, point0))
+      const projection2 = project(vec3(), diff2, subtract(vec3(), pos, point1))
 
-            const effect = Math.min(y1, y2)
-            addScaled(result, result, dirToAdd, effect)
-          }
-        }
+      const dist1 = distance(projection1, pos)
+      const dist2 = distance(projection2, pos)
+      const dist3 = distance(point1, pos)
+
+      if (dist1 < minDist) {
+        minDist = dist1
+        closest = [point0, diff1]
+      }
+      if (dist2 < minDist) {
+        minDist = dist2
+        closest = [point1, diff2]
+      }
+      if (dist3 < minDist) {
+        minDist = dist3
+        closest = [point1, diff3]
       }
     }
 
-    const vecLength = length(result)
-    // if (vecLength > 5) {
-    //   scale(result, result, 5 / vecLength)
-    // }
-
-    return result
+    let dir = vec3()
+    if (closest) {
+      vec3Normalize(dir, closest[1])
+      scale(dir, dir, 1 / (minDist + 0.1))
+    }
+    return [minDist, dir]
   }
 }
 
@@ -97,6 +102,8 @@ export const startTrack = new Track()
 for (let i = -100; i <= 500; i++) {
   startTrack.addPoint(vec3([i * 5, -0.01, 0]))
 }
+
+startTrack.update()
 
 export const mainTrack = new Track()
 
@@ -115,7 +122,8 @@ for (let i = 0; i < 1000; i++) {
 
   vec3Lerp(direction, direction, directionTo, 0.25)
 
-  const newPoint = addScaled(vec3(), mainTrack.points[i], direction, 5)
+  const newPoint = addScaled(vec3(), mainTrack.points[i].position, direction, 5)
   mainTrack.addPoint(newPoint)
 }
 
+mainTrack.update()

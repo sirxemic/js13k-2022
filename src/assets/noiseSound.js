@@ -1,4 +1,4 @@
-import { audioContext, createBiquadFilter } from '../audio/context.js'
+import { audioContext, createBiquadFilter, createGain } from '../audio/context.js'
 import { sampleNoise } from '../audio/utils.js'
 import { audioMix } from './audioMix.js'
 
@@ -20,15 +20,17 @@ export function generateNoiseSound () {
       noiseNode.loop = true
       noiseNode.loopEnd = noiseBuffer.length
 
-      const filter1 = createBiquadFilter('highshelf', 500, undefined, -12)
-      const filter2 = createBiquadFilter('lowpass', 500)
-      const filter3 = createBiquadFilter('peaking', 170, undefined -10)
+      const mix = createGain()
+      const filter1 = createBiquadFilter('lowpass', 80)
+      noiseNode.connect(filter1).connect(mix)
+      const filter2 = createBiquadFilter('bandpass', 3000)
+      const gain2 = createGain(0.002)
+      noiseNode.connect(filter2).connect(gain2).connect(mix)
 
-      noiseNode.connect(filter1).connect(filter2).connect(filter3)
 
       noiseNode.start()
 
-      audioMix.addFxChannel(filter3)
+      audioMix.addFxChannel(mix)
     }
   }
 }

@@ -55,16 +55,20 @@ particles.vertexData(particlesData)
 
 let life = 0
 
+let noiseVolume = 0
+
 export function updateScene (dt) {
   if (timeStarted) {
     time += dt * 2.5 / 4
   }
+
   for (let i = 0; i < particlesCount; i++) {
     const pos = particlesData.subarray(i * particleStructSize, i * particleStructSize + 4)
-    const dir = mainTrack.getDirection(pos)
-    addScaled(pos, pos, dir, 20 * dt)
-    pos[3] = 20 * length(dir) / 5
-    if (pos[3] < 0.01) {
+    const [dist, dir] = mainTrack.getDistanceAndDirection(pos)
+    addScaled(pos, pos, dir, 50 * dt)
+    pos[3] = Math.max(0, Math.min(3, 3 - dist / 5))
+
+    if (dist > 15) {
       particleLifeData[i] += dt
     } else {
       particleLifeData[i] = 0
@@ -79,15 +83,17 @@ export function updateScene (dt) {
     }
   }
 
+  if (window.DEBUG) {
+    window.DEBUG = false
+  }
+
   particles.updateVertexData(particlesData)
 
-  const dir = mainTrack.getDirection(head.position)
-  let mix
-  if (length(dir) > 0.7) mix = 0
-  else {
-    mix = 1 - length(dir) / 0.7
-  }
-  audioMix.setMix(Math.max(0, Math.min(1, mix)))
+  const [dist, dir] = mainTrack.getDistanceAndDirection(head.position)
+  let musicVolume = Math.min(1, Math.max(0, (15 - (dist - 5)) / 15))
+  let noiseVolume = Math.min(1, Math.max(0, (dist - 20) / 15))
+  audioMix.setMusicVolume(musicVolume)
+  audioMix.setFxVolume(noiseVolume)
 }
 
 export function renderScene () {
