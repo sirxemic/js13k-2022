@@ -94,8 +94,8 @@ class Track {
 
 export const startTrack = new Track()
 
-for (let i = -100; i <= 100; i++) {
-  startTrack.addPoint(vec3([-i * 5, 0, 0]))
+for (let i = -100; i <= 500; i++) {
+  startTrack.addPoint(vec3([i * 5, -0.01, 0]))
 }
 
 export const mainTrack = new Track()

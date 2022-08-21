@@ -1,5 +1,5 @@
 import { Material } from '../core/graphics/Material.js'
-import { uniformCameraPosition, uniformLife, uniformTextures, varyingPosition } from '../core/constants.js'
+import { uniformCameraPosition, uniformLife, uniformTextures, uniformTime, varyingPosition } from '../core/constants.js'
 import { noiseTexture } from './noise.js'
 import { particleTexture } from './particle.js'
 
@@ -12,6 +12,7 @@ export function loadSkyboxMaterial () {
   skyboxMaterial = new Material(`/*glsl*/
   uniform vec3 ${uniformCameraPosition};
   uniform float ${uniformLife};
+  uniform float ${uniformTime};
 
 #define LAYERS            4.0
 

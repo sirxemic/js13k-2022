@@ -7,14 +7,14 @@ import { VertexBuffer } from '../core/graphics/VertexBuffer.js'
 import { particleMaterial } from '../assets/particleMaterial.js'
 import { mat4 } from '../math/mat4.js'
 import { addScaled, distance, vec3Normalize, length } from '../math/vec3.js'
-import { uniformLife } from '../core/constants.js'
+import { uniformLife, uniformTime } from '../core/constants.js'
 import { mainTrack, startTrack } from './track.js'
 import { Material } from '../core/graphics/Material.js'
 
 // <debug>
 const trackMesh = new VertexBuffer(gl.LINE_STRIP)
 trackMesh.vertexLayout([3])
-trackMesh.vertexData(mainTrack.getPointsData())
+trackMesh.vertexData(startTrack.getPointsData())
 
 const trackMaterial = new Material(`
 vec4 shader () { return vec4(1.0); }
@@ -27,35 +27,46 @@ const particlesCount = 1000
 const particleStructSize = 7
 
 const particlesData = new Float32Array(particlesCount * particleStructSize)
+const particleLifeData = []
 for (let i = 0; i < particlesCount; i++) {
   particlesData.set([
-    Math.random() * 100 - 50,
-    Math.random() * 100 - 50,
-    Math.random() * 100 - 50,
+    Math.random() * 50 - 25,
+    Math.random() * 50 - 25,
+    Math.random() * 50 - 25,
     0,
     0.5 + 0.5 * Math.random(),
     0.5 + 0.5 * Math.random(),
     0.5 + 0.5 * Math.random()
   ], i * particleStructSize)
+
+  particleLifeData.push(0)
 }
 const particles = new VertexBuffer(gl.POINTS)
 particles.vertexLayout([3, 1, 3])
 particles.vertexData(particlesData)
 
 let life = 0
+let time = 0
 
 export function updateScene (dt) {
+  time += dt
   for (let i = 0; i < particlesCount; i++) {
     const pos = particlesData.subarray(i * particleStructSize, i * particleStructSize + 4)
-    const dir = mainTrack.getDirection(pos)
+    const dir = startTrack.getDirection(pos)
     addScaled(pos, pos, dir, 20 * dt)
     pos[3] = 20 * length(dir) / 5
-    if (distance(pos, head.position) > 51) {
+    if (pos[3] < 0.01) {
+      particleLifeData[i] += dt
+    } else {
+      particleLifeData[i] = 0
+    }
+    if (distance(pos, head.position) > 51 || particleLifeData[i] > 1) {
       const dir = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]
       vec3Normalize(dir)
       particlesData[i * particleStructSize + 0] = head.position[0] + dir[0] * 50
       particlesData[i * particleStructSize + 1] = head.position[1] + dir[1] * 50
       particlesData[i * particleStructSize + 2] = head.position[2] + dir[2] * 50
+      particleLifeData[i] = 0
     }
   }
 
@@ -71,6 +82,7 @@ export function renderScene () {
     0.0, 0.0, -10.0, 0.0,
     ...camera.matrix.slice(12)
   ]))
+  skyboxMaterial.shader.set1f(uniformTime, time)
   skyboxMaterial.shader.set1f(uniformLife, life)
   draw(cube, skyboxMaterial)
 
