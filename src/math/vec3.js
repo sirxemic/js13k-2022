@@ -57,6 +57,13 @@ export function vec3Normalize (target, vec = target) {
   return target
 }
 
+export function cross (target, v1, v2) {
+  target[0] = v1[1] * v2[2] - v2[2] * v1[1]
+  target[1] = v1[2] * v2[0] - v2[0] * v1[2]
+  target[2] = v1[0] * v2[1] - v2[1] * v1[0]
+  return target
+}
+
 export function applyQuat (target, vec, quat) {
   const x = vec[0], y = vec[1], z = vec[2]
   const qx = quat[0], qy = quat[1], qz = quat[2], qw = quat[3]

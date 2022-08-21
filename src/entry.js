@@ -5,8 +5,15 @@ import { desktopRig } from './rigs/DesktopRig.js'
 import { initAssets } from './initAssets.js'
 import { mainSong } from './assets/mainSong.js'
 import { audioContext } from './audio/context.js'
-import { startTime } from './world/scene.js'
 import { noiseSound } from './assets/noiseSound.js'
+import { setMainScene } from './world/main.js'
+
+function start () {
+  audioContext.resume()
+  mainSong.start()
+  noiseSound.start()
+  setMainScene()
+}
 
 initAssets().then(() => {
   VrLoop.onEnd = () => {
@@ -16,17 +23,15 @@ initAssets().then(() => {
   vrButton.onclick = () => {
     DefaultLoop.stop()
     VrLoop.start()
-    mainSong.start()
+
+    start()
   }
 
   startButton.onclick = () => {
     startScreen.hidden = true
-    audioContext.resume()
-    mainSong.start()
-    noiseSound.start()
-    startTime()
-
     desktopRig.startControls()
+
+    start()
   }
 
   DefaultLoop.start()

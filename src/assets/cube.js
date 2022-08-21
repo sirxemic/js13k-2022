@@ -2,7 +2,7 @@ import { VertexBuffer } from '../core/graphics/VertexBuffer.js'
 
 export const cube = new VertexBuffer()
 cube.vertexLayout([3])
-cube.vertexData([
+cube.vertexData(new Float32Array([
   -1, 1, 1,
   -1,-1,-1,
   -1,-1, 1,
@@ -50,4 +50,4 @@ cube.vertexData([
   -1, 1,-1,
   -1, 1, 1,
   1, 1, 1
-])
+]))

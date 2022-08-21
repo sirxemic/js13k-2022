@@ -1,8 +1,9 @@
-import { renderScene, updateScene } from '../world/scene.js'
+import { updateScene } from '../world/main.js'
 import { gl } from './context.js'
 import { vrRig } from '../rigs/VrRig.js'
 import { camera } from './camera.js'
 import { XR } from './XrContext.js'
+import { renderWorld } from '../world/world.js'
 
 let previousT
 
@@ -61,7 +62,7 @@ export const VrLoop = {
       let viewport = baseLayer['getViewport'](view)
       gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height)
 
-      renderScene()
+      renderWorld()
     }
   }
 }

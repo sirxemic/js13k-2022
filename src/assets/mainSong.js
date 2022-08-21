@@ -618,23 +618,15 @@ export async function generateSong () {
       hihatChannel.start()
       chordsChannel.start()
 
-      audioMix.addMusicChannel(arpsChannel, decibelsToAmplitude(-24), decibelsToAmplitude(0))
-      audioMix.addMusicChannel(bassChannel, decibelsToAmplitude(-12), 0)
-      audioMix.addMusicChannel(subtlePadChannel, decibelsToAmplitude(-30), decibelsToAmplitude(0))
+      audioMix.addMusicChannel(0, arpsChannel, decibelsToAmplitude(-24), decibelsToAmplitude(0))
+      audioMix.addMusicChannel(12, bassChannel, decibelsToAmplitude(-12), 0)
+      audioMix.addMusicChannel(32, subtlePadChannel, decibelsToAmplitude(-30), decibelsToAmplitude(0))
 
-      audioMix.addMusicChannel(softLeadChannel, decibelsToAmplitude(-20), decibelsToAmplitude(0))
+      audioMix.addMusicChannel(50, softLeadChannel, decibelsToAmplitude(-20), decibelsToAmplitude(0))
 
-      const filter = audioContext.createBiquadFilter()
-      filter.type = 'lowpass'
-      filter.frequency.value = 5000
-
-      lead1Channel.connect(filter)
-      lead2Channel.connect(filter)
-
-      audioMix.addMusicChannel(filter, decibelsToAmplitude(-26), decibelsToAmplitude(0))
-      audioMix.addMusicChannel(kickChannel, decibelsToAmplitude(-20), 0)
-      audioMix.addMusicChannel(snareChannel, decibelsToAmplitude(-20), decibelsToAmplitude(-10))
-      audioMix.addMusicChannel(hihatChannel, decibelsToAmplitude(-20), decibelsToAmplitude(-10))
+      audioMix.addMusicChannel(80, kickChannel, decibelsToAmplitude(-20), 0)
+      audioMix.addMusicChannel(90, snareChannel, decibelsToAmplitude(-20), decibelsToAmplitude(-10))
+      audioMix.addMusicChannel(90, hihatChannel, decibelsToAmplitude(-20), decibelsToAmplitude(-10))
 
       const filter2 = audioContext.createBiquadFilter()
       filter2.type = 'peaking'
@@ -644,7 +636,16 @@ export async function generateSong () {
 
       chordsChannel.connect(filter2)
 
-      audioMix.addMusicChannel(filter2, decibelsToAmplitude(-20), decibelsToAmplitude(-10))
+      audioMix.addMusicChannel(110, filter2, decibelsToAmplitude(-20), decibelsToAmplitude(-10))
+
+      const filter = audioContext.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.value = 5000
+
+      lead1Channel.connect(filter)
+      lead2Channel.connect(filter)
+
+      audioMix.addMusicChannel(150, filter, decibelsToAmplitude(-26), decibelsToAmplitude(0))
     }
   }
 }

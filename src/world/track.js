@@ -1,10 +1,8 @@
 import {
   add,
-  addScaled,
+  addScaled, cross,
   distance,
-  dot,
-  length,
-  perpendicularDistance, project,
+  project,
   scale,
   subtract,
   vec3,
@@ -12,7 +10,6 @@ import {
   vec3Normalize
 } from '../math/vec3.js'
 import { GridSpace } from './gridSpace.js'
-import { KdTreeSpace } from './kdTreeSpace.js'
 
 class Track {
   constructor () {
@@ -27,6 +24,7 @@ class Track {
     this.space = new GridSpace(this.points)
   }
 
+  // <debug>
   getPointsData () {
     const result = []
     for (const point of this.points) {
@@ -36,8 +34,9 @@ class Track {
         point.position[2]
       )
     }
-    return result
+    return new Float32Array(result)
   }
+  // </debug>
 
   getDistanceAndDirection (pos) {
     let minDist = 1000
@@ -51,7 +50,6 @@ class Track {
 
       let diff1
       let diff2
-      let diff3 = vec3()
 
       if (!point0) {
         diff1 = diff2 = vec3Normalize(subtract(vec3(), point2, point1))
@@ -64,11 +62,13 @@ class Track {
         diff2 = vec3Normalize(subtract(vec3(), point2, point1))
       }
 
-      add(diff3, diff1, diff2)
-      scale(diff3, diff3, 0.5)
+      const posRelativeTo1 = subtract(vec3(), pos, point1)
 
-      const projection1 = project(vec3(), diff1, subtract(vec3(), pos, point0))
-      const projection2 = project(vec3(), diff2, subtract(vec3(), pos, point1))
+      const projection1 = project(vec3(), subtract(vec3(), pos, point0), diff1)
+      const projection2 = project(vec3(), posRelativeTo1, diff2)
+
+      add(projection1, projection1, point0)
+      add(projection2, projection2, point1)
 
       const dist1 = distance(projection1, pos)
       const dist2 = distance(projection2, pos)
@@ -83,15 +83,18 @@ class Track {
         closest = [point1, diff2]
       }
       if (dist3 < minDist) {
+        const cornerNormal = cross(vec3(), diff1, diff2)
+        const diff3 = vec3Normalize(cross(vec3(), posRelativeTo1, cornerNormal))
         minDist = dist3
         closest = [point1, diff3]
       }
     }
 
-    let dir = vec3()
+    let dir
     if (closest) {
-      vec3Normalize(dir, closest[1])
-      scale(dir, dir, 1 / (minDist + 0.1))
+      dir = closest[1]
+    } else {
+      dir = vec3()
     }
     return [minDist, dir]
   }
@@ -113,16 +116,17 @@ let startDirection = vec3([1, 0, 0])
 let direction = vec3(startDirection)
 let directionTo = vec3([1, 0, 0])
 for (let i = 0; i < 1000; i++) {
-  if (distance(direction, directionTo) < 0.1) {
+  if (i > 15 && distance(direction, directionTo) < 0.1) {
     directionTo[0] += Math.random() - 0.5
     directionTo[1] += Math.random() - 0.5
     directionTo[2] += Math.random() - 0.5
     vec3Normalize(directionTo)
   }
 
-  vec3Lerp(direction, direction, directionTo, 0.25)
+  vec3Normalize(vec3Lerp(direction, direction, directionTo, 0.25))
 
-  const newPoint = addScaled(vec3(), mainTrack.points[i].position, direction, 5)
+  const newPoint = vec3()
+  addScaled(newPoint, mainTrack.points[i].position, direction, 5)
   mainTrack.addPoint(newPoint)
 }
 

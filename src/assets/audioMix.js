@@ -14,13 +14,22 @@ export function generateAudioMix () {
   fxGain.connect(audioDestination)
   reverbNode.connect(musicGain).connect(audioDestination)
 
+  const channels = []
+
   audioMix = {
-    addMusicChannel (node, volume, reverbSend) {
-      const generalGain = createGain(volume)
+    addMusicChannel (minimum, node, volume, reverbSend) {
+      const controller = createGain(minimum ? 0.00001 : 1)
+      const channelGain = createGain(volume)
       const sendControl = createGain(reverbSend)
 
-      node.connect(generalGain).connect(musicGain)
-      generalGain.connect(sendControl).connect(reverbNode)
+      node.connect(channelGain).connect(controller).connect(musicGain)
+      controller.connect(sendControl).connect(reverbNode)
+
+      channels.push({
+        minimum,
+        muted: minimum, // !!minimum
+        controller
+      })
     },
 
     addFxChannel (node) {
@@ -33,6 +42,16 @@ export function generateAudioMix () {
 
     setFxVolume (volume) {
       fxGain.gain.value = volume
+    },
+
+    setMusicAmount (amount) {
+      for (const channel of channels) {
+        if (channel.muted && channel.minimum < amount) {
+          channel.muted = false
+          channel.controller.gain.setValueAtTime(0.00001, audioContext.currentTime)
+          channel.controller.gain.exponentialRampToValueAtTime(1, audioContext.currentTime + 10)
+        }
+      }
     }
   }
 }

@@ -14,7 +14,7 @@ export class GridSpace {
     }
   }
 
-  getClosestPoints (pos) {
+  getClosestPoints (pos, amount) {
     const result = []
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
@@ -29,6 +29,6 @@ export class GridSpace {
         }
       }
     }
-    return result.sort((a, b) => a[1] - b[1])
+    return result.sort((a, b) => a[1] - b[1]).slice(0, amount)
   }
 }

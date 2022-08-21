@@ -45,7 +45,7 @@ export class VertexBuffer {
     this.length = data.length
     gl.bindVertexArray(this.va)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vb)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW)
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
     this.vertices = this.length / this.stride
   }
 

@@ -10,6 +10,7 @@ import {
   uniformView, varyingBrightness, varyingColor, varyingDistance,
   varyingPosition
 } from '../core/constants.js'
+import { VIEW_DISTANCE } from '../constants.js'
 
 export let particleMaterial
 
@@ -21,12 +22,12 @@ in vec3 ${varyingColor};
 
 uniform float ${uniformLife};
 
-float fba = 10.0;
-float ga = 50.0;
+float fba = ${VIEW_DISTANCE * 0.75};
+float ga = ${VIEW_DISTANCE.toFixed(1)};
 
 vec4 shader() {
   float b = min(10.0, 1.0 + ${uniformLife});
-  float a = max(0.0, ${varyingDistance} < fba ? 1.0 : (ga - ${varyingDistance}) / (ga - fba));
+  float a = clamp((ga - ${varyingDistance}) / (ga - fba), 0.0, 1.0);
   return texture(${uniformTextures}[0], gl_PointCoord.xy) * vec4(${varyingColor}, 1.0) * b * a;
 }
 `, `/*glsl*/
