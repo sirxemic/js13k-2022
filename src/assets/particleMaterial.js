@@ -23,7 +23,7 @@ in vec3 ${varyingColor};
 uniform float ${uniformLife};
 
 float fba = ${VIEW_DISTANCE * 0.75};
-float ga = ${VIEW_DISTANCE.toFixed(1)};
+float ga = ${VIEW_DISTANCE}.0;
 
 vec4 shader() {
   float b = min(10.0, 1.0 + ${uniformLife});

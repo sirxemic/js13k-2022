@@ -41,7 +41,7 @@ class Track {
   getDistanceAndDirection (pos) {
     let minDist = 1000
 
-    let closest = null
+    let closestDir
 
     for (const [{ i }, _] of this.space.getClosestPoints(pos, 3, 50)) {
       let point0 = this.points[i - 1]?.position
@@ -76,27 +76,20 @@ class Track {
 
       if (dist1 < minDist) {
         minDist = dist1
-        closest = [point0, diff1]
+        closestDir = diff1
       }
       if (dist2 < minDist) {
         minDist = dist2
-        closest = [point1, diff2]
+        closestDir = diff2
       }
       if (dist3 < minDist) {
-        const cornerNormal = cross(vec3(), diff1, diff2)
-        const diff3 = vec3Normalize(cross(vec3(), posRelativeTo1, cornerNormal))
         minDist = dist3
-        closest = [point1, diff3]
+        const cornerNormal = cross(vec3(), diff1, diff2)
+        closestDir = vec3Normalize(cross(vec3(), posRelativeTo1, cornerNormal))
       }
     }
 
-    let dir
-    if (closest) {
-      dir = closest[1]
-    } else {
-      dir = vec3()
-    }
-    return [minDist, dir]
+    return [minDist, closestDir || vec3()]
   }
 }
 
