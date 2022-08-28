@@ -3,14 +3,12 @@ import { Shader } from './Shader.js'
 import { SubShader } from './Subshader.js'
 import {
   attributePosition,
-
   uniformCameraPosition,
   uniformColor,
   uniformModel,
   uniformProjection,
   uniformTextures,
   uniformView,
-
   varyingPosition
 } from '../constants.js'
 import { camera } from '../camera.js'

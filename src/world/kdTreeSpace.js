@@ -45,7 +45,7 @@ export class KdTreeSpace {
         if (i === node.dimension) {
           linearPoint[i] = point[i]
         } else {
-          linearPoint[i] = node.obj[i]
+          linearPoint[i] = node.obj.position[i]
         }
       }
 

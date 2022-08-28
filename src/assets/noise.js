@@ -11,5 +11,5 @@ export function generateNoiseTexture () {
     data[i * 4 + 2] = Math.floor(Math.random() * 256)
     data[i * 4 + 3] = 255
   }
-  noiseTexture = new Texture(data, size, size)
+  noiseTexture = new Texture({ data, width: size })
 }

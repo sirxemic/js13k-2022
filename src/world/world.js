@@ -6,8 +6,8 @@ import { cube } from '../assets/cube.js'
 import { VertexBuffer } from '../core/graphics/VertexBuffer.js'
 import { particleMaterial } from '../assets/particleMaterial.js'
 import { mat4 } from '../math/mat4.js'
-import { addScaled, distance, vec3Normalize } from '../math/vec3.js'
-import { uniformLife, uniformTime } from '../core/constants.js'
+import { addScaled, distance, subtract, vec3, vec3Lerp, vec3Normalize } from '../math/vec3.js'
+import { uniformFocusPosition, uniformLife, uniformTime } from '../core/constants.js'
 import { startTrack } from './track.js'
 import { Material } from '../core/graphics/Material.js'
 import { FLOW_RADIUS, STRONG_FLOW_RADIUS, VIEW_DISTANCE } from '../constants.js'
@@ -15,6 +15,7 @@ import { FLOW_RADIUS, STRONG_FLOW_RADIUS, VIEW_DISTANCE } from '../constants.js'
 export let currentTime = 0
 export let currentLifeAmount = 0
 export let currentTrack = startTrack
+export let focus = vec3()
 
 // <debug>
 const trackMesh = new VertexBuffer(gl.LINE_STRIP)
@@ -37,6 +38,12 @@ export function updateTime (dt) {
 }
 export function updateLifeAmount (amount) {
   currentLifeAmount = amount
+}
+export function updateFocus (dt) {
+  const target = currentTrack.getDistanceAndDirection(head.position)[1]
+  if (target) {
+    vec3Lerp(focus, focus, target, (1 - Math.exp(-10 * dt)))
+  }
 }
 
 const particlesCount = 1000
@@ -63,23 +70,24 @@ particles.vertexLayout([3, 1, 3])
 particles.vertexData(particlesData)
 
 export function resetPosition () {
+  const diff = vec3(head.position)
   for (let i = 0; i < particlesCount; i++) {
-    particlesData[i * particleStructSize + 0] -= head.position[0]
-    particlesData[i * particleStructSize + 1] -= head.position[1]
-    particlesData[i * particleStructSize + 2] -= head.position[2]
+    const pos = particlesData.subarray(i * particleStructSize, i * particleStructSize + 3)
+
+    subtract(pos, pos, diff)
   }
+
+  subtract(head.position, head.position, diff)
 
   particles.updateVertexData(particlesData)
 
-  head.position[0] = 0
-  head.position[1] = 0
-  head.position[2] = 0
+  focus = currentTrack.getDistanceAndDirection(head.position)[1]
 }
 
 export function updateParticles (dt) {
   for (let i = 0; i < particlesCount; i++) {
     const pos = particlesData.subarray(i * particleStructSize, i * particleStructSize + 4)
-    const [dist, dir] = currentTrack.getDistanceAndDirection(pos)
+    const [dist, _, dir] = currentTrack.getDistanceAndDirection(pos)
     const factor = dist < STRONG_FLOW_RADIUS ? 1 : Math.max(0, (FLOW_RADIUS + STRONG_FLOW_RADIUS - dist) / FLOW_RADIUS)
     const speed = 15 * factor
     addScaled(pos, pos, dir, 3 * speed * dt)
@@ -91,7 +99,7 @@ export function updateParticles (dt) {
       particleLifeData[i] = 0
     }
 
-    if (distance(pos, head.position) > VIEW_DISTANCE || particleLifeData[i] > 1) {
+    if (distance(pos, focus) > VIEW_DISTANCE * 1.5 || particleLifeData[i] > 1) {
       const dir = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]
       vec3Normalize(dir)
       particlesData[i * particleStructSize + 0] = head.position[0] + dir[0] * VIEW_DISTANCE
@@ -123,6 +131,7 @@ export function renderWorld () {
   gl.blendFunc(gl.ONE, gl.ONE)
   particleMaterial.updateCameraUniforms()
   particleMaterial.setModel(mat4())
+  particleMaterial.shader.set3fv(uniformFocusPosition, focus)
   particleMaterial.shader.set1f(uniformLife, currentLifeAmount)
   draw(particles, particleMaterial)
   gl.disable(gl.BLEND)

@@ -4,10 +4,14 @@ import {
   attributeBrightness,
   attributeColor,
   attributePosition,
-  uniformCameraPosition, uniformLife,
+  uniformCameraPosition,
+  uniformFocusPosition,
+  uniformLife,
   uniformModel,
   uniformTextures,
-  uniformView, varyingBrightness, varyingColor, varyingDistance,
+  uniformView,
+  varyingColor,
+  varyingDistance,
   varyingPosition
 } from '../core/constants.js'
 import { VIEW_DISTANCE } from '../constants.js'
@@ -17,7 +21,6 @@ export let particleMaterial
 export function loadParticleMaterial () {
   particleMaterial = new Material(`/*glsl*/
 in float ${varyingDistance};
-in float ${varyingBrightness};
 in vec3 ${varyingColor};
 
 uniform float ${uniformLife};
@@ -34,15 +37,15 @@ vec4 shader() {
 in float ${attributeBrightness};
 in vec3 ${attributeColor};
 
+uniform vec3 ${uniformFocusPosition};
+
 out float ${varyingDistance};
-out float ${varyingBrightness};
 out vec3 ${varyingColor};
 
 void vertex() {
   ${varyingPosition} = vec3(${uniformModel} * vec4(${attributePosition}, 1.0));
-  ${varyingDistance} = length(${uniformCameraPosition} - ${varyingPosition});
+  ${varyingDistance} = max(length(${uniformCameraPosition} - ${varyingPosition}), length(${uniformFocusPosition} - ${varyingPosition}));
   ${varyingColor} = ${attributeColor} * ${attributeBrightness};
-  ${varyingBrightness} = ${attributeBrightness};
   vec4 m = ${uniformView} * ${uniformModel} * vec4(${attributePosition}, 1.0);
   gl_PointSize = 2000.0 / -m.z;
 }

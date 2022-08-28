@@ -1,4 +1,4 @@
-import { head, camera } from '../core/camera.js'
+import { camera, head } from '../core/camera.js'
 import { canvas } from '../core/context.js'
 import { quat, quatMultiply, setFromUnitVectors } from '../math/quat.js'
 import { applyQuat, vec3, vec3Normalize } from '../math/vec3.js'

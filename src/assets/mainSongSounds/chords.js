@@ -1,11 +1,5 @@
 import { contextSampleRate } from '../../audio/context.js'
-import {
-  generateSound,
-  applyEnvelope,
-  getFrequencyDelta,
-  sampleSine,
-  sampleNoise
-} from '../../audio/utils.js'
+import { applyEnvelope, generateSound, getFrequencyDelta, sampleNoise, sampleSine } from '../../audio/utils.js'
 
 export function chords (frequency, length) {
   const volumeEnvelope = [

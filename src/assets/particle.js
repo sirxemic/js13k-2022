@@ -19,5 +19,5 @@ export function generateParticleTexture () {
     }
   }
 
-  particleTexture = new Texture(pixels, size, size)
+  particleTexture = new Texture({ data: pixels, width: size })
 }

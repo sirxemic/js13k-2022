@@ -1,4 +1,4 @@
-import { contextSampleRate, audioContext } from './context.js'
+import { audioContext, contextSampleRate } from './context.js'
 import { EnvelopeSampler } from '../utils.js'
 
 export function decibelsToAmplitude (db) {

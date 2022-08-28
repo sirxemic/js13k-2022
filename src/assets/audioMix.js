@@ -37,11 +37,11 @@ export function generateAudioMix () {
     },
 
     setMusicVolume (volume) {
-      musicGain.gain.value = volume
+      musicGain.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.1)
     },
 
     setFxVolume (volume) {
-      fxGain.gain.value = volume
+      fxGain.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.1)
     },
 
     setMusicAmount (amount) {

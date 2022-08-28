@@ -1,10 +1,4 @@
-import {
-  applyEnvelope,
-  generateSound,
-  getFrequencyDelta,
-  sampleSkewedSine,
-  sumSounds
-} from '../../audio/utils.js'
+import { applyEnvelope, generateSound, getFrequencyDelta, sampleSkewedSine, sumSounds } from '../../audio/utils.js'
 
 let switchLeftRight = false
 export function detuned (frequency, duration) {

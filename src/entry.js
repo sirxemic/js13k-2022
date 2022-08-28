@@ -1,6 +1,6 @@
 import { VrLoop } from './core/VrLoop.js'
 import { DefaultLoop } from './core/DefaultLoop.js'
-import { startButton, vrButton, startScreen } from './ui.js'
+import { startButton, startScreen, vrButton } from './ui.js'
 import { desktopRig } from './rigs/DesktopRig.js'
 import { initAssets } from './initAssets.js'
 import { mainSong } from './assets/mainSong.js'

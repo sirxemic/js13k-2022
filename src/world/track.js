@@ -1,15 +1,5 @@
-import {
-  add,
-  addScaled, cross,
-  distance,
-  project,
-  scale,
-  subtract,
-  vec3,
-  vec3Lerp,
-  vec3Normalize
-} from '../math/vec3.js'
-import { GridSpace } from './gridSpace.js'
+import { add, addScaled, cross, distance, project, subtract, vec3, vec3Lerp, vec3Normalize } from '../math/vec3.js'
+import { KdTreeSpace } from './kdTreeSpace.js'
 
 class Track {
   constructor () {
@@ -21,7 +11,7 @@ class Track {
   }
 
   update () {
-    this.space = new GridSpace(this.points)
+    this.space = new KdTreeSpace(this.points)
   }
 
   // <debug>
@@ -42,6 +32,7 @@ class Track {
     let minDist = 1000
 
     let closestDir
+    let closestPoint
 
     for (const [{ i }, _] of this.space.getClosestPoints(pos, 3, 50)) {
       let point0 = this.points[i - 1]?.position
@@ -76,20 +67,23 @@ class Track {
 
       if (dist1 < minDist) {
         minDist = dist1
+        closestPoint = projection1
         closestDir = diff1
       }
       if (dist2 < minDist) {
         minDist = dist2
+        closestPoint = projection2
         closestDir = diff2
       }
       if (dist3 < minDist) {
         minDist = dist3
+        closestPoint = point1
         const cornerNormal = cross(vec3(), diff1, diff2)
         closestDir = vec3Normalize(cross(vec3(), posRelativeTo1, cornerNormal))
       }
     }
 
-    return [minDist, closestDir || vec3()]
+    return [minDist, closestPoint, closestDir || vec3()]
   }
 }
 
@@ -124,3 +118,5 @@ for (let i = 0; i < 1000; i++) {
 }
 
 mainTrack.update()
+
+console.log(mainTrack.space.getClosestPoints(vec3(), 2, 50))

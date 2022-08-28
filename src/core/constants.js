@@ -4,6 +4,7 @@ export const uniformModel = 'um'
 export const uniformColor = 'uc'
 export const uniformTextures = 'ut'
 export const uniformCameraPosition = 'ucp'
+export const uniformFocusPosition = 'ufp'
 export const uniformLife = 'ul'
 export const uniformTime = 'ui'
 

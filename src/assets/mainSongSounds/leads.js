@@ -1,9 +1,4 @@
-import {
-  applyEnvelope,
-  generateSound,
-  getFrequencyDelta,
-  sampleSkewedSine
-} from '../../audio/utils.js'
+import { applyEnvelope, generateSound, getFrequencyDelta, sampleSkewedSine } from '../../audio/utils.js'
 
 function makeLead (sampler) {
   return function (baseFrequency, duration) {
