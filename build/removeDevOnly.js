@@ -1,4 +1,3 @@
-import fs from 'fs'
 export function removeDevOnly (code) {
   const originalLines = code.split('\n')
   const finalLines = []

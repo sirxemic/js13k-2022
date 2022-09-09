@@ -12,4 +12,5 @@ function getElement (name) {
 
 export const vrButton = getElement(classNames.vr)
 export const startButton = getElement(classNames.desktop)
-export const ui = getElement(classNames.ui)
+export const startScreen = getElement(classNames.startScreen)
+export const loading = getElement(classNames.loading)

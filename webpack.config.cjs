@@ -25,9 +25,12 @@ module.exports = {
     })
   ],
   devServer: {
+    https: !!process.env.VR,
     host: '0.0.0.0',
+    port: process.env.VR ? 443 : 8082,
     static: [
       'src'
     ]
   }
 }
+

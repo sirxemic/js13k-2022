@@ -2,49 +2,47 @@ import { gl } from '../context.js'
 import { Shader } from './Shader.js'
 import { SubShader } from './Subshader.js'
 import {
-  attributeNormal,
   attributePosition,
-  attributeUv, uniformColor,
+  uniformHeadPosition,
+  uniformColor,
   uniformModel,
   uniformProjection,
-  uniformView, varyingTexCoord
+  uniformTextures,
+  uniformView,
+  varyingPosition, varyingUv, uniformCameraPosition
 } from '../constants.js'
+import { camera, head } from '../camera.js'
 
 const common = {
   fSSC0: `/*glsl*/
-precision mediump float;
+precision highp float;
 
+in vec3 ${varyingPosition};
 out vec4 o;
 
-in vec2 ${varyingTexCoord};
-
-uniform vec4 ${uniformColor};`,
+uniform vec4 ${uniformColor};
+uniform sampler2D ${uniformTextures}[2];
+`,
   fSSC1: `/*glsl*/
 void main() {
   o = shader();
 }`,
   vSSC0: `/*glsl*/
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in vec3 ${attributePosition};
-layout(location = 1) in vec2 ${attributeUv};
-layout(location = 2) in vec3 ${attributeNormal};
 
 uniform mat4 ${uniformProjection};
 uniform mat4 ${uniformView};
 uniform mat4 ${uniformModel};
+uniform vec3 ${uniformHeadPosition};
 
-out vec2 ${varyingTexCoord};`,
-  vSSC1: `/*glsl*/
-void main() {
-  gl_Position = vertex();
-  ${varyingTexCoord} = texcoord();
-  ${varyingTexCoord}.y = 1.0 - ${varyingTexCoord}.y;
-}`
+out vec3 ${varyingPosition};
+`
 }
 
 function buildVertexShader (code) {
-  return new SubShader(gl.VERTEX_SHADER, common.vSSC0 + '\n' + code + '\n' + common.vSSC1)
+  return new SubShader(gl.VERTEX_SHADER, common.vSSC0 + '\n' + code)
 }
 
 function buildFragmentShader (code) {
@@ -52,55 +50,41 @@ function buildFragmentShader (code) {
 }
 
 const defaultVertexShader = buildVertexShader(`/*glsl*/
-vec4 vertex() {
-  return ${uniformProjection} * ${uniformView} * ${uniformModel} * vec4(${attributePosition}, 1.0);
-}
-vec2 texcoord() {
-  return ${attributeUv};
+void main() {
+  ${varyingPosition} = vec3(${uniformModel} * vec4(${attributePosition}, 1.0));
+  gl_Position = ${uniformProjection} * ${uniformView} * vec4(${varyingPosition}, 1.0);
 }
 `)
-const defaultFragmentShader = buildFragmentShader(`/*glsl*/ vec4 shader() { return ${uniformColor}; }`)
 
 export class Material {
-  constructor (customVertex = null, customTexCoord = null, customShader = null) {
+  constructor (fragmentShader, customVertex) {
     this.shader = new Shader()
     let vSS = null
 
-    if (!customVertex && !customTexCoord) {
+    if (!customVertex) {
       this.shader.join(defaultVertexShader)
-    } else if (customVertex && customTexCoord) {
+    } else {
       vSS = buildVertexShader(customVertex)
-      this.shader.join(vSS)
-    } else if (!customVertex && customTexCoord) {
-      vSS = buildVertexShader('vec4 vertex() { return ${uniformProjection} * ${uniformView} * ${uniformModel} * vec4(${attributePosition}, 1.0); }')
-      this.shader.join(vSS)
-    } else if (customVertex && !customTexCoord) {
-      vSS = buildVertexShader(`${customVertex}\nvec2 texcoord() { return ${attributeUv}; }`)
       this.shader.join(vSS)
     }
 
-    if (!customShader) {
-      this.shader.join(defaultFragmentShader)
-      this.shader.link()
-    } else {
-      const fSS = buildFragmentShader(customShader)
-      this.shader.join(fSS)
-      this.shader.link()
-    }
+    const fSS = buildFragmentShader(fragmentShader)
+    this.shader.join(fSS)
+    this.shader.link()
 
     this.shader.bind()
     this.textures = []
-    this.shader.set4f(uniformColor, 1.0, 1.0, 1.0, 1.0)
+    for(let i = 0; i < 2; i++) {
+      this.shader.set1i(`${uniformTextures}[${i}]`, i)
+    }
   }
 
-  setProjection (mat) {
+  updateCameraUniforms () {
     this.shader.bind()
-    this.shader.set4x4f(uniformProjection, mat)
-  }
-
-  setView (mat) {
-    this.shader.bind()
-    this.shader.set4x4f(uniformView, mat)
+    this.shader.set4x4f(uniformProjection, camera.projectionMatrix)
+    this.shader.set3fv(uniformHeadPosition, head.position)
+    this.shader.set3fv(uniformCameraPosition, camera.matrix.slice(12, 15))
+    this.shader.set4x4f(uniformView, camera.viewMatrix)
   }
 
   setModel (mat) {
@@ -108,8 +92,7 @@ export class Material {
     this.shader.set4x4f(uniformModel, mat)
   }
 
-  setColor (rgba) {
-    this.shader.bind()
-    this.shader.set4fv(uniformColor, rgba)
+  setTexture (texture, slot = 0) {
+    this.textures[slot] = texture
   }
 }

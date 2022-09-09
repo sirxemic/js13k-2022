@@ -1,6 +1,8 @@
-import {renderScene, updateScene} from "../world/scene.js";
-import {gl} from "./context.js";
-import {desktopRig} from "../rigs/DesktopRig.js";
+import { renderUi, updateScene } from '../world/main.js'
+import { gl } from './context.js'
+import { desktopRig } from '../rigs/DesktopRig.js'
+import { renderWorld } from '../world/world.js'
+import { setRig, toggleControls } from '../rigs/controls.js'
 
 let previousT
 let raf
@@ -8,6 +10,7 @@ export const DefaultLoop = {
   start () {
     raf = window.requestAnimationFrame(DefaultLoop.update)
     desktopRig.start()
+    setRig(desktopRig)
   },
 
   update (t) {
@@ -30,11 +33,12 @@ export const DefaultLoop = {
     gl.clearColor(0, 0, 0, 1)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    renderScene()
+    renderWorld()
+    renderUi()
   },
 
   stop () {
-    desktopRig.pause()
+    toggleControls(false)
     cancelAnimationFrame(raf)
   }
 }

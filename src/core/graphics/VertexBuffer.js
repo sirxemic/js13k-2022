@@ -1,7 +1,9 @@
 import { gl } from '../context.js'
 
 export class VertexBuffer {
-  constructor () {
+  constructor (type = gl.TRIANGLES) {
+    this.type = type
+
     this.va = gl.createVertexArray()
     gl.bindVertexArray(this.va)
 
@@ -43,19 +45,20 @@ export class VertexBuffer {
     this.length = data.length
     gl.bindVertexArray(this.va)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vb)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW)
-    gl.bindBuffer(gl.ARRAY_BUFFER, null)
-    gl.bindVertexArray(null)
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
     this.vertices = this.length / this.stride
+  }
+
+  updateVertexData (data) {
+    gl.bindVertexArray(this.va)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vb)
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, data)
   }
 
   draw () {
     gl.bindVertexArray(this.va)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vb)
 
-    gl.drawArrays(gl.TRIANGLES, 0, this.vertices)
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, null)
-    gl.bindVertexArray(null)
+    gl.drawArrays(this.type, 0, this.vertices)
   }
 }

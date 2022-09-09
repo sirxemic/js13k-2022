@@ -11,19 +11,56 @@
     font-family: system-ui;
     font-weight: 900;
     color: #fff;
-    font-size: 2vw;
+    font-size: 2vmax;
     text-shadow: 0 0 0.25em #0008, 0 0 0.5em #fff;
     cursor: default;
+    background: #000;
+    user-select: none;
+    text-align: center;
   }
-  div { position: fixed; }
-  .start {
-    bottom: 3.5em;
-    left: 50%;
-    transform: translateX(-50%);
+
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .startScreen, .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
     z-index: 1;
+    position: fixed;
+    inset: 0;
+    padding: 1em;
+  }
+
+  .loading {
+    background: #000;
+  }
+
+  [hidden] {
+    display: none
+  }
+
+  .title {
+    font-size: 2em;
+    margin-bottom: 1em;
+  }
+
+  .instructions {
+    margin-bottom: 2em;
+    font-size: 0.75em;
+  }
+
+  .extra {
+    font-size: 0.5em;
+  }
+
+  .start {
     padding: 0.5em 0;
     width: 5em;
-    text-align: center;
     border-radius: 0.25em;
     transition: all 0.2s ease
   }
@@ -34,21 +71,23 @@
   .start.vr {
     bottom: 0.5em;
   }
-  .title {
-    font-size: 2em;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
 </style>
 </head>
 <body>
   <canvas></canvas>
-  <div class="ui">
+  <div class="startScreen">
     <div class="title">Beyonder</div>
+    <div class="instructions">
+      You're dead. There is one thing left to do: go beyonder.<br>
+      Follow the flow, or be a lost soul forever.<br><br>
+      You move in the direction you're looking.<br>
+      Hold a mouse button or trigger to go faster.<br>How fast can you go beyonder?
+    </div>
     <div class="start desktop">Start</div>
     <div class="start vr">VR</div>
+    <div class="extra">Stick-controls supported for VR</div>
   </div>
+  <div class="loading">Generating assets...</div>
 
   <script src="build.js"></script>
 </body>

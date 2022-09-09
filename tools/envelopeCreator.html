@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Envelope visualizer</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<canvas width="500" height="500"></canvas>
+<script>
+  class EnvelopeSampler {
+    constructor (envelope, logarithmic = false) {
+      this.envelope = envelope
+      this.logarithmic = logarithmic
+      this.reset()
+    }
+
+    reset () {
+      this.i = 0
+    }
+
+    sample (position) {
+      while (this.i < this.envelope.length - 1) {
+        let [t1, v1, curve = 1] = this.envelope[this.i]
+        let [t2, v2] = this.envelope[this.i + 1]
+        if (t1 <= position && position < t2) {
+          let t = (position - t1) / (t2 - t1)
+          if (curve > 1) {
+            t = t ** curve
+          } else {
+            t = 1 - (1 - t) ** (1 / curve)
+          }
+          return this.logarithmic ? v1 * (v2 / v1) ** t : v1 + t * (v2 - v1)
+        }
+        this.i++
+      }
+      return this.envelope[this.envelope.length - 1][1]
+    }
+  }
+
+  let envelope = [
+    [0, 1, 0.15],
+    [0.33 / 0.33, 0],
+  ]
+
+  const canvas = document.querySelector('canvas')
+  const ctx = canvas.getContext('2d')
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+
+  const margin = 50
+
+  function step () {
+    requestAnimationFrame(step)
+
+    ctx.clearRect(0,0,canvas.width, canvas.height)
+    const sampler = new EnvelopeSampler(envelope)
+
+    ctx.beginPath()
+    const W = canvas.width - margin * 2
+    const H = canvas.height - margin * 2
+    for (let i = 0; i < W; i++) {
+      const x = margin + i
+      const y = canvas.height - margin - sampler.sample(i / (W - 1)) * H
+      if (i === 0) ctx.moveTo(x, y)
+      else ctx.lineTo(x, y)
+    }
+    ctx.stroke()
+  }
+
+  step()
+</script>
+</body>
+</html>

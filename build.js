@@ -5,12 +5,10 @@ build({
   // it actually does mangle them.
   fixBeforeMinify (code) {
     return code
-      .replace(/\borientation/g, 'mOrientation')
-      .replace(/\bactions/g, 'mActions')
   },
 
   // Hack: undo some renaming :P
   fixAfterHtmlMinify (html) {
-    return html.replace('your s ', 'your screen ')
+    return html
   }
 })
