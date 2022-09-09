@@ -1,4 +1,4 @@
-import { applyEnvelope, generateSound, highPassFilter, sampleNoise } from '../../audio/utils.js'
+import { applyEnvelope, generateSound, sampleNoise } from '../../audio/utils.js'
 
 export function hihat (freq, duration, volume) {
   let ampEnvelope = [
@@ -7,7 +7,7 @@ export function hihat (freq, duration, volume) {
     [1, 0],
   ]
 
-  return applyEnvelope(highPassFilter(generateSound(0.2, sampleNoise), 5000), ampEnvelope)
+  return applyEnvelope(generateSound(0.2, sampleNoise), ampEnvelope)
 }
 
 export function sweep (_, duration) {
@@ -16,5 +16,5 @@ export function sweep (_, duration) {
     [1, 0.5],
   ]
 
-  return applyEnvelope(highPassFilter(generateSound(duration, sampleNoise), 5000), ampEnvelope)
+  return applyEnvelope(generateSound(duration, sampleNoise), ampEnvelope)
 }

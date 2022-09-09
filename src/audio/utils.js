@@ -51,169 +51,7 @@ export function detune (freq, cents) {
   return freq * 2 ** (cents / 1200)
 }
 
-function ensureEnvelope (envelopeOrValue) {
-  if (typeof envelopeOrValue === 'number') {
-    return [[0, envelopeOrValue], [1, envelopeOrValue]]
-  }
-  return envelopeOrValue
-}
-
-function coefficients (b0, b1, b2, a0, a1, a2) {
-  return [
-    b0 / a0,
-    b1 / a0,
-    b2 / a0,
-    a1 / a0,
-    a2 / a0
-  ]
-}
-
-function getHighPassCoefficients (frequency, Q) {
-  let n = Math.tan(Math.PI * frequency / contextSampleRate)
-  let nSquared = n * n
-  let invQ = 1 / Q
-  let c1 = 1 / (1 + invQ * n + nSquared)
-
-  return coefficients(
-    c1, c1 * -2,
-    c1, 1,
-    c1 * 2 * (nSquared - 1),
-    c1 * (1 - invQ * n + nSquared)
-  )
-}
-
-function getLowPassCoefficients (frequency, Q) {
-  let n = 1 / Math.tan(Math.PI * frequency / contextSampleRate)
-  let nSquared = n * n
-  let invQ = 1 / Q
-  let c1 = 1 / (1 + invQ * n + nSquared)
-
-  return coefficients(
-    c1, c1 * 2,
-    c1, 1,
-    c1 * 2 * (1 - nSquared),
-    c1 * (1 - invQ * n + nSquared)
-  )
-}
-
-function getBandPassCoefficients (frequency, Q) {
-  let n = 1 / Math.tan(Math.PI * frequency / contextSampleRate)
-  let nSquared = n * n
-  let invQ = 1 / Q
-  let c1 = 1 / (1 + invQ * n + nSquared)
-
-  return coefficients(
-    c1 * n * invQ, 0,
-    -c1 * n * invQ, 1,
-    c1 * 2 * (1 - nSquared),
-    c1 * (1 - invQ * n + nSquared)
-  )
-}
-
-function getHighShelfCoefficients (cutOffFrequency, Q, gainFactor) {
-  const A = Math.sqrt(gainFactor)
-  const aminus1 = A - 1
-  const aplus1 = A + 1
-  const omega = (Math.PI * 2 * cutOffFrequency) / contextSampleRate
-  const coso = Math.cos(omega)
-  const beta = Math.sin(omega) * Math.sqrt(A) / Q
-  const aminus1TimesCoso = aminus1 * coso
-
-  return coefficients (
-    A * (aplus1 + aminus1TimesCoso + beta),
-    A * -2.0 * (aminus1 + aplus1 * coso),
-    A * (aplus1 + aminus1TimesCoso - beta),
-    aplus1 - aminus1TimesCoso + beta,
-    2.0 * (aminus1 - aplus1 * coso),
-    aplus1 - aminus1TimesCoso - beta
-  )
-}
-
-function getPeakFilterCoefficients (frequency, Q, gainFactor) {
-  const A = Math.sqrt(gainFactor)
-  const omega = (Math.PI * 2 * frequency) / sampleRate
-  const alpha = 0.5 * Math.sin(omega) / Q
-  const c2 = -2.0 * Math.cos(omega)
-  const alphaTimesA = alpha * A
-  const alphaOverA = alpha / A
-
-  return coefficients(
-    1.0 + alphaTimesA,
-    c2,
-    1.0 - alphaTimesA,
-    1.0 + alphaOverA,
-    c2,
-    1.0 - alphaOverA
-  )
-}
-
-function filter (buffer, coeffFunction) {
-  let lv1 = 0
-  let lv2 = 0
-
-  for (let i = 0; i < buffer.length; ++i) {
-    let coeffs = coeffFunction(i / (buffer.length - 1))
-
-    let inV = buffer[i]
-    let outV = (inV * coeffs[0]) + lv1
-    buffer[i] = outV
-
-    lv1 = (inV * coeffs[1]) - (outV * coeffs[3]) + lv2
-    lv2 = (inV * coeffs[2]) - (outV * coeffs[4])
-  }
-
-  return buffer
-}
-
-export function lowPassFilter (buffer, frequencies, Q = Math.SQRT1_2) {
-  const freqSampler = new EnvelopeSampler(ensureEnvelope(frequencies), true)
-  const qSampler = new EnvelopeSampler(ensureEnvelope(Q))
-
-  return filter(buffer, x => getLowPassCoefficients(freqSampler.sample(x), qSampler.sample(x)))
-}
-
-export function highPassFilter (buffer, frequencies, Q = Math.SQRT1_2) {
-  const freqSampler = new EnvelopeSampler(ensureEnvelope(frequencies), true)
-  const qSampler = new EnvelopeSampler(ensureEnvelope(Q))
-
-  return filter(buffer, x => getHighPassCoefficients(freqSampler.sample(x), qSampler.sample(x)))
-}
-
-export function bandPassFilter (buffer, frequencies, Q = Math.SQRT1_2) {
-  const freqSampler = new EnvelopeSampler(ensureEnvelope(frequencies), true)
-  const qSampler = new EnvelopeSampler(ensureEnvelope(Q))
-
-  return filter(buffer, x => getBandPassCoefficients(freqSampler.sample(x), qSampler.sample(x)))
-}
-
-export function highShelf (buffer, cutOffFrequencies, Q, gainFactor) {
-  const freqSampler = new EnvelopeSampler(ensureEnvelope(cutOffFrequencies), true)
-  const qSampler = new EnvelopeSampler(ensureEnvelope(Q))
-  const gainSampler = new EnvelopeSampler(ensureEnvelope(gainFactor))
-
-  return filter(buffer, x => getHighShelfCoefficients(freqSampler.sample(x), qSampler.sample(x), gainSampler.sample(x)))
-}
-
-export function peakFilter (buffer, frequencies, Q, gainFactor) {
-  const freqSampler = new EnvelopeSampler(ensureEnvelope(frequencies), true)
-  const qSampler = new EnvelopeSampler(ensureEnvelope(Q))
-  const gainSampler = new EnvelopeSampler(ensureEnvelope(gainFactor))
-
-  return filter(buffer, x => getPeakFilterCoefficients(freqSampler.sample(x), qSampler.sample(x), gainSampler.sample(x)))
-}
-
-export function distort (buffer, amount) {
-  for (let i = 0; i < buffer.length; i++) {
-    buffer[i] *= amount
-    if (buffer[i] < -1) buffer[i] = -1
-    else if (buffer[i] > 1) buffer[i] = 1
-    else buffer[i] = Math.sin(buffer[i] * Math.PI / 2)
-    buffer[i] /= amount
-  }
-  return buffer
-}
-
-function combineSounds (buffers, func) {
+export function mixBuffers (buffers, scalars) {
   let maxLength = 0
   buffers.forEach(buffer => { maxLength = Math.max(maxLength, buffer.length) })
 
@@ -221,26 +59,11 @@ function combineSounds (buffers, func) {
 
   buffers.forEach((buffer, j) => {
     for (let i = 0; i < buffer.length; i++) {
-      func(outputBuffer, j, buffer, i, buffers.length)
+      outputBuffer[i] += scalars[j] * buffer[i] / buffers.length
     }
   })
 
   return outputBuffer
-}
-
-export function sumSounds (buffers, scalars = [1, 1, 1]) {
-  return combineSounds(buffers, (data, bufferIndex, bufferData, sampleIndex, bufferCount) => {
-    data[sampleIndex] += scalars[bufferIndex] * bufferData[sampleIndex] / bufferCount
-  })
-}
-
-export function multiplySounds (buffers) {
-  return combineSounds(buffers, (data, bufferIndex, bufferData, sampleIndex, bufferCount) => {
-    if (bufferIndex === 0) {
-      data[sampleIndex] = 1
-    }
-    data[sampleIndex] *= bufferData[sampleIndex] / bufferCount
-  })
 }
 
 export function generateSound (length, sampleFunction) {

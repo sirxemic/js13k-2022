@@ -16,7 +16,7 @@ export class KdTreeSpace {
       let dim = depth % 3
       if (points.length === 0) return null
       if (points.length === 1) return createNode(points[0], dim, parent)
-      points.sort((a, b) => a.position[dim] - b.position[dim])
+      points.sort((a, b) => a.spacePosition[dim] - b.spacePosition[dim])
       const median = Math.floor(points.length / 2)
       const node = createNode(points[median], dim, parent)
       node.left = buildTree(points.slice(0, median), depth + 1, node)
@@ -38,18 +38,18 @@ export class KdTreeSpace {
     }
 
     const nearestSearch = (node) => {
-      let ownDistance = distance(point, node.obj.position)
+      let ownDistance = distance(point, node.obj.spacePosition)
       let linearPoint = [0, 0, 0]
 
       for (let i = 0; i < 3; i++) {
         if (i === node.dimension) {
           linearPoint[i] = point[i]
         } else {
-          linearPoint[i] = node.obj.position[i]
+          linearPoint[i] = node.obj.spacePosition[i]
         }
       }
 
-      const linearDistance = distance(linearPoint, node.obj.position)
+      const linearDistance = distance(linearPoint, node.obj.spacePosition)
       if (!node.right && !node.left) {
         if (bestNodes.size() < maxNodes || ownDistance < bestNodes.peek()[1]) {
           saveNode(node, ownDistance)
@@ -62,7 +62,7 @@ export class KdTreeSpace {
         bestChild = node.left
       } else if (!node.left) {
         bestChild = node.right
-      } else if (point[node.dimension] < node.obj.position[node.dimension]) {
+      } else if (point[node.dimension] < node.obj.spacePosition[node.dimension]) {
         bestChild = node.left
       } else {
         bestChild = node.right
@@ -165,12 +165,12 @@ class BinaryHeap {
       if (child2N < length) {
         const child2 = this.content[child2N],
           child2Score = this.scoreFunction(child2)
-        if (child2Score < (swap == null ? elemScore : child1Score)) {
+        if (child2Score < (swap === null ? elemScore : child1Score)) {
           swap = child2N
         }
       }
 
-      if (swap != null) {
+      if (swap !== null) {
         this.content[n] = this.content[swap]
         this.content[swap] = element
         n = swap

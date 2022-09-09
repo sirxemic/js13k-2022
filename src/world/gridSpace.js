@@ -24,7 +24,7 @@ export class GridSpace {
           if (!cell) continue
 
           for (const point of cell) {
-            result.push([point, distance(point.position, pos)])
+            result.push([point, distance(point.spacePosition, pos)])
           }
         }
       }

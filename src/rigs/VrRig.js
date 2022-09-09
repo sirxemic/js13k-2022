@@ -3,27 +3,25 @@ import { camera, head } from '../core/camera.js'
 import { fromXYZW, quat, quatInvert, quatMultiply, setFromUnitVectors } from '../math/quat.js'
 import { applyQuat, length, vec3, vec3Normalize } from '../math/vec3.js'
 
-class VrRig {
-  constructor () {
-    this.prevAxes = [vec3(), vec3()]
-    this.controlsActive = true
-  }
+export const vrRig = {
+  prevAxes: [vec3(), vec3()],
+  controlsActive: true,
 
   startControls () {
-    this.controlsActive = true
-  }
+    vrRig.controlsActive = true
+  },
 
   pauseControls () {
-    this.controlsActive = false
-  }
+    vrRig.controlsActive = false
+  },
 
-  update (dt, frame) {
-    if (this.controlsActive) {
+  update (frame) {
+    if (vrRig.controlsActive) {
       const inputSources = XR.session['inputSources']
       for (let i = 0; i < Math.min(2, inputSources.length); i++) {
         const inputSource = inputSources[i]
         const currentAxis = vec3([inputSource.gamepad.axes[2], inputSource.gamepad.axes[3], 0])
-        if (length(currentAxis) > 0.5 && length(this.prevAxes[i]) < 0.2) {
+        if (length(currentAxis) > 0.5 && length(vrRig.prevAxes[i]) < 0.2) {
           const movementVector = vec3([-currentAxis[0], currentAxis[1], 2.0])
 
           vec3Normalize(movementVector)
@@ -33,7 +31,7 @@ class VrRig {
           quatMultiply(head.quaternion, head.quaternion, rotation)
         }
 
-        this.prevAxes[i].set(currentAxis)
+        vrRig.prevAxes[i].set(currentAxis)
       }
     }
 
@@ -80,5 +78,3 @@ class VrRig {
     // )
   }
 }
-
-export const vrRig = new VrRig()

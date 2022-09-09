@@ -12,19 +12,20 @@ import {
 } from './world.js'
 import { mainTrack, mainTrackEndingStart } from './track.js'
 import { CAMERA_SPEED, FLOW_RADIUS, SCALE, VIEW_DISTANCE } from '../constants.js'
-import { addScaled, applyQuat, distance, vec3 } from '../math/vec3.js'
+import { addScaled, applyQuat, distance, length, vec3 } from '../math/vec3.js'
 import { saturate } from '../math/math.js'
 import { gl } from '../core/context.js'
 import { fadeMaterial } from '../assets/fadeMaterial.js'
 import { uniformColor } from '../core/constants.js'
 import { draw } from '../core/renderer.js'
 import { quad } from '../assets/quad.js'
-import { mouseDown, toggleControls } from '../rigs/controls.js'
-import { kickFade, kickStart } from '../assets/mainSong.js'
+import { activeRig, mouseDown } from '../rigs/controls.js'
+import { kickFade, kickStart, snareFade, snareStart } from '../assets/mainSong.js'
 import { uiTextMaterial } from '../assets/uiTextMaterial.js'
 import { loseText, winText } from '../assets/texts.js'
 import { mat4, mat4Mult } from '../math/mat4.js'
 import { reload } from '../utils.js'
+import { deltaTime } from '../core/core.js'
 
 const STATE_MENU = 0
 const STATE_PLAYING = 1
@@ -47,37 +48,37 @@ export function setMainScene () {
 
 let speedScale = 0
 
-export function updateScene (dt) {
+export function updateScene () {
   const forward = vec3([0, 0, -1])
   applyQuat(forward, forward, head.eyesQuaternion)
   applyQuat(forward, forward, head.quaternion)
 
-  speedScale = Math.max(0, speedScale + (mouseDown ? dt : -0.3 * dt))
+  speedScale = Math.max(0, speedScale + (mouseDown ? deltaTime : -0.3 * deltaTime))
   const scale = Math.pow(2, speedScale)
 
-  addScaled(head.position, head.position, forward, scale * CAMERA_SPEED * dt)
+  addScaled(head.position, head.position, forward, scale * CAMERA_SPEED * deltaTime)
 
   if (state !== STATE_WINNING && distance(head.position, focus) < VIEW_DISTANCE) {
-    updateFocus(dt)
+    updateFocus()
   }
 
-  updateParticles(dt)
+  updateParticles()
 
   if (state === STATE_MENU) {
-    introUpdate(dt)
+    introUpdate()
   } else {
-    mainUpdate(dt)
+    mainUpdate()
   }
 }
 
 export function introUpdate () {
-  if (head.position[0] > 100 * SCALE) {
+  if (length(head.position) > 100 * SCALE) {
     resetPosition()
   }
 }
 
-export function mainUpdate (dt) {
-  updateTime(dt)
+export function mainUpdate () {
+  updateTime()
 
   if (state === STATE_PLAYING) {
     const dist = distance(head.position, focus)
@@ -90,23 +91,23 @@ export function mainUpdate (dt) {
 
     if (dist > VIEW_DISTANCE * 1.5) {
       state = STATE_DYING
-      toggleControls(false)
+      activeRig.pauseControls()
     } else if (progress > mainTrackEndingStart) {
       state = STATE_WINNING
-      toggleControls(false)
+      activeRig.pauseControls()
     }
   } else if (state === STATE_DYING) {
-    fadeAmount = saturate(fadeAmount + dt * 0.1)
+    fadeAmount = saturate(fadeAmount + deltaTime * 0.1)
     if (fadeAmount === 1) {
       reload()
       return
     }
-    fadeColor[3] += dt / 3
+    fadeColor[3] += deltaTime / 3
 
     noiseVolume = saturate(1 - fadeColor[3] / 2)
   } else if (state === STATE_WINNING) {
-    fadeAmount = saturate(fadeAmount + dt * 0.1)
-    const factor = 1 - Math.exp(-dt * 20)
+    fadeAmount = saturate(fadeAmount + deltaTime * 0.1)
+    const factor = 1 - Math.exp(-deltaTime * 20)
 
     fadeColor[0] = fadeColor[1] = fadeColor[2] = 1
     fadeColor[3] += (1 - fadeColor[3]) * factor / 10
@@ -124,6 +125,7 @@ export function mainUpdate (dt) {
 
 function updateExperience () {
   const kickAmount = saturate((progress - kickStart) / kickFade) ** 4
+  const snareAmount = saturate((progress - snareStart) / snareFade) ** 4
   const measurePos = (currentTime % 1.6) / 1.6
   let beatViz = 0
   if (measurePos < 0.25) {
@@ -141,7 +143,7 @@ function updateExperience () {
 
   updateViz(
     beatViz * musicVolume * kickAmount,
-    snareViz * musicVolume * kickAmount
+    snareViz * musicVolume * snareAmount
   )
 }
 

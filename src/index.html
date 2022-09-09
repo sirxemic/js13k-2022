@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
 <title>Beyonder</title>
 <style>
+  * {
+    text-shadow: 0 0 0.25em #0008, 0 0 0.5em #fff;
+  }
+
   body {
     margin: 0;
     overflow: hidden;
@@ -12,7 +16,6 @@
     font-weight: 900;
     color: #fff;
     font-size: 2vmax;
-    text-shadow: 0 0 0.25em #0008, 0 0 0.5em #fff;
     cursor: default;
     background: #000;
     user-select: none;
@@ -52,6 +55,7 @@
   .instructions {
     margin-bottom: 2em;
     font-size: 0.75em;
+    max-width: 40em;
   }
 
   .extra {
@@ -80,14 +84,14 @@
     <div class="instructions">
       You're dead. There is one thing left to do: go beyonder.<br>
       Follow the flow, or be a lost soul forever.<br><br>
-      You move in the direction you're looking.<br>
-      Hold a mouse button or trigger to go faster.<br>How fast can you go beyonder?
+      You move in the direction you're looking.<br>You go faster by button, trigger or touch.<br>
+      How fast can you reach the place beyond?
     </div>
     <div class="start desktop">Start</div>
     <div class="start vr">VR</div>
     <div class="extra">Stick-controls supported for VR</div>
   </div>
-  <div class="loading">Generating assets...</div>
+  <div class="loading">Generating music...</div>
 
   <script src="build.js"></script>
 </body>

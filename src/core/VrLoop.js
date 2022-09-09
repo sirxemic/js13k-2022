@@ -5,6 +5,7 @@ import { camera } from './camera.js'
 import { XR } from './XrContext.js'
 import { renderWorld } from '../world/world.js'
 import { setRig } from '../rigs/controls.js'
+import { setDeltaTme } from './core.js'
 
 let previousT
 
@@ -44,12 +45,12 @@ export const VrLoop = {
       return
     }
 
-    const dt = (t - previousT) / 1000
+    setDeltaTme(t - previousT)
     previousT = t
 
-    vrRig.update(dt, frame)
+    vrRig.update(frame)
 
-    updateScene(dt)
+    updateScene()
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, baseLayer['framebuffer'])
 

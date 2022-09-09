@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "webpack serve",
     "dev-vr": "cross-env VR=1 webpack serve",
-    "build": "node --experimental-json-modules build.js"
+    "build": "node --experimental-json-modules build.js",
+    "serve": "http-server -S -C ./node_modules/.cache/webpack-dev-server/server.pem -K ./node_modules/.cache/webpack-dev-server/server.pem ./dist"
   },
   "author": "sirxemic",
   "license": "MIT",
@@ -16,6 +17,7 @@
     "css-loader": "^6.2.0",
     "google-closure-compiler": "^20220803.0.0",
     "html-minifier": "^3.5.19",
+    "http-server": "^14.1.1",
     "jszip": "^3.1.5",
     "rollup": "^2.56.3",
     "spglsl": "0.0.18",

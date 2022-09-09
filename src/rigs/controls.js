@@ -1,18 +1,33 @@
 export let activeRig
 
-export const setRig = (rig) => {
+export function setRig (rig) {
   activeRig = rig
-}
-
-export const toggleControls = (active) => {
-  if (active) {
-    activeRig.startControls()
-  } else {
-    activeRig.pauseControls()
-  }
 }
 
 export let mouseDown = false
 
+let previousTouches = {}
+
 document.addEventListener('mousedown', e => { mouseDown = true })
+document.addEventListener('touchstart', e => {
+  for (const touch of e.changedTouches) {
+    previousTouches[touch.identifier] = touch
+  }
+  mouseDown = true
+})
 document.addEventListener('mouseup', e => { mouseDown = false })
+document.addEventListener('touchend', e => {
+  for (const touch of e.changedTouches) {
+    delete previousTouches[touch.identifier]
+  }
+  mouseDown = false
+})
+document.addEventListener('touchmove', e => {
+  for (const touch of e.changedTouches) {
+    const previousTouch = previousTouches[touch.identifier]
+    previousTouches[touch.identifier] = touch
+    if (Math.hypot(touch.clientX - previousTouch.clientX, touch.clientY - previousTouch.clientY) > 10) {
+      mouseDown = false
+    }
+  }
+})

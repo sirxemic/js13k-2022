@@ -1,4 +1,4 @@
-import { applyEnvelope, generateSound, getFrequencyDelta, sampleSkewedSine, sumSounds } from '../../audio/utils.js'
+import { applyEnvelope, generateSound, getFrequencyDelta, sampleSkewedSine, mixBuffers } from '../../audio/utils.js'
 
 let switchLeftRight = false
 export function detuned (frequency, duration) {
@@ -30,14 +30,14 @@ export function detuned (frequency, duration) {
 
   return [
     applyEnvelope(
-      sumSounds([
+      mixBuffers([
         mid,
         left
       ], [0.8, 0.4]),
       envelope
     ),
     applyEnvelope(
-      sumSounds([
+      mixBuffers([
         mid,
         right
       ], [0.8, 0.4]),

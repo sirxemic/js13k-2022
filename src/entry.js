@@ -6,7 +6,7 @@ import { mainSong } from './assets/mainSong.js'
 import { audioContext } from './audio/context.js'
 import { noiseSound } from './assets/noiseSound.js'
 import { setMainScene } from './world/main.js'
-import { toggleControls } from './rigs/controls.js'
+import { activeRig } from './rigs/controls.js'
 
 function start () {
   audioContext.resume()
@@ -29,9 +29,9 @@ initAssets().then(() => {
     start()
   }
 
-  startButton.onclick = () => {
+  startButton.onclick = async () => {
     startScreen.hidden = true
-    toggleControls(true)
+    await activeRig.startControls()
 
     start()
   }

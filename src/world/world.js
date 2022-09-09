@@ -13,6 +13,7 @@ import { Material } from '../core/graphics/Material.js'
 import { FLOW_RADIUS, PARTICLE_SPEED, STRONG_FLOW_RADIUS, VIEW_DISTANCE } from '../constants.js'
 import { getRandomBrightColor } from '../utils.js'
 import { saturate } from '../math/math.js'
+import { deltaTime } from '../core/core.js'
 
 export let currentTime = 0
 export let kickVizAmount = 0
@@ -37,17 +38,17 @@ export function updateTrack (track) {
   trackMesh.vertexData(currentTrack.getPointsData())
   // </debug>
 }
-export function updateTime (dt) {
-  currentTime += dt
+export function updateTime () {
+  currentTime += deltaTime
 }
 export function updateViz (kick, snare) {
   kickVizAmount = kick
   snareVizAmount = snare
 }
-export function updateFocus (dt) {
+export function updateFocus () {
   const data = currentTrack.getDistanceAndDirection(head.position)
   if (data[1]) {
-    vec3Lerp(focus, focus, data[1], (1 - Math.exp(-10 * dt)))
+    vec3Lerp(focus, focus, data[1], (1 - Math.exp(-10 * deltaTime)))
   }
   progress = data[3] * 100
 }
@@ -87,28 +88,28 @@ export function resetPosition () {
   focus = currentTrack.getDistanceAndDirection(head.position)[1]
 }
 
-export function updateParticles (dt) {
+export function updateParticles () {
   for (let i = 0; i < particlesCount; i++) {
     const pos = particleRenderData.subarray(i * particleStructSize, i * particleStructSize + 3)
     const props = particleRenderData.subarray(i * particleStructSize + 3, i * particleStructSize + 6)
     const [dist, _, newDir] = currentTrack.getDistanceAndDirection(pos)
     const factor = saturate(1 - (dist - STRONG_FLOW_RADIUS) / FLOW_RADIUS)
-    const speed = PARTICLE_SPEED * factor
+    const speed = PARTICLE_SPEED * factor * factor
 
     const dir = particleStateData.subarray(i * 4, i * 4 + 3)
 
     if (length(dir) === 0) {
       dir.set(newDir)
     } else {
-      vec3Lerp(dir, dir, newDir, 1 - Math.exp(-dt * 5))
+      vec3Lerp(dir, dir, newDir, 1 - Math.exp(-deltaTime * 5))
     }
 
-    addScaled(pos, pos, dir, 3 * speed * dt)
+    addScaled(pos, pos, dir, 3 * speed * deltaTime)
 
     props[0] = factor * 5
 
     if (factor < 0.001) {
-      particleStateData[i * 4 + 3] += dt
+      particleStateData[i * 4 + 3] += deltaTime
     } else {
       particleStateData[i * 4 + 3] = 0
     }

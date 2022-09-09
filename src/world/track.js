@@ -16,8 +16,8 @@ class Track {
     this.points = []
   }
 
-  addPoint (position) {
-    this.points.push({ i: this.points.length, position })
+  addPoint (spacePosition) {
+    this.points.push({ i: this.points.length, spacePosition }) // Renamed to spacePosition so it gets mangled
   }
 
   update () {
@@ -29,9 +29,9 @@ class Track {
     const result = []
     for (const point of this.points) {
       result.push(
-        point.position[0],
-        point.position[1],
-        point.position[2]
+        point.spacePosition[0],
+        point.spacePosition[1],
+        point.spacePosition[2]
       )
     }
     return new Float32Array(result)
@@ -45,10 +45,10 @@ class Track {
     let closestPoint
     let progress = 0
 
-    for (const [{ i }, _] of this.space.getClosestPoints(pos, 3, VIEW_DISTANCE)) {
-      let point0 = this.points[i - 1]?.position
-      let point1 = this.points[i].position
-      let point2 = this.points[i + 1]?.position
+    for (const [{ i }, _] of this.space.getClosestPoints(pos, 1, VIEW_DISTANCE)) {
+      let point0 = this.points[i - 1]?.spacePosition
+      let point1 = this.points[i].spacePosition
+      let point2 = this.points[i + 1]?.spacePosition
 
       let diff1
       let diff2
@@ -113,7 +113,7 @@ class Track {
 export const startTrack = new Track()
 
 for (let i = -10; i <= 50; i++) {
-  startTrack.addPoint(vec3([i * TRACK_SEGMENT_LENGTH, 0, 0]))
+  startTrack.addPoint(vec3([0, 0, -i * TRACK_SEGMENT_LENGTH]))
 }
 
 startTrack.update()
@@ -127,9 +127,9 @@ const segments = 1000
 const endingSegmentsCount = Math.ceil(mainTrackEndingLength / TRACK_SEGMENT_LENGTH)
 export const mainTrackEndingStart = 100 * (1 - endingSegmentsCount * 0.9 / (segments - 1))
 
-let startDirection = vec3([1, 0, 0])
+let startDirection = vec3([0, 0, -1])
 let direction = vec3(startDirection)
-let directionTo = vec3([1, 0, 0])
+let directionTo = vec3([0, 0, -1])
 for (let i = 0; i < segments; i++) {
   if (i >= 15 && i < (segments - endingSegmentsCount - 1) && distance(direction, directionTo) < 0.1) {
     directionTo[0] += Math.random() - 0.5
@@ -141,7 +141,7 @@ for (let i = 0; i < segments; i++) {
   vec3Normalize(vec3Lerp(direction, direction, directionTo, 0.25))
 
   const newPoint = vec3()
-  addScaled(newPoint, mainTrack.points[i].position, direction, TRACK_SEGMENT_LENGTH)
+  addScaled(newPoint, mainTrack.points[i].spacePosition, direction, TRACK_SEGMENT_LENGTH)
   mainTrack.addPoint(newPoint)
 }
 

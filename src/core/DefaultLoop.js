@@ -1,16 +1,17 @@
 import { renderUi, updateScene } from '../world/main.js'
 import { gl } from './context.js'
-import { desktopRig } from '../rigs/DesktopRig.js'
+import { desktopAndMobileRig } from '../rigs/DesktopAndMobileRig.js'
 import { renderWorld } from '../world/world.js'
-import { setRig, toggleControls } from '../rigs/controls.js'
+import { activeRig, setRig } from '../rigs/controls.js'
+import { setDeltaTme } from './core.js'
 
 let previousT
 let raf
 export const DefaultLoop = {
   start () {
     raf = window.requestAnimationFrame(DefaultLoop.update)
-    desktopRig.start()
-    setRig(desktopRig)
+    desktopAndMobileRig.start()
+    setRig(desktopAndMobileRig)
   },
 
   update (t) {
@@ -21,12 +22,13 @@ export const DefaultLoop = {
       return
     }
 
-    const dt = (t - previousT) / 1000
+    setDeltaTme(t - previousT)
+
     previousT = t
 
-    desktopRig.update(dt)
+    desktopAndMobileRig.update()
 
-    updateScene(dt)
+    updateScene()
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
@@ -38,7 +40,7 @@ export const DefaultLoop = {
   },
 
   stop () {
-    toggleControls(false)
+    activeRig.pauseControls()
     cancelAnimationFrame(raf)
   }
 }

@@ -1,8 +1,7 @@
 import { audioMix } from './audioMix.js'
-import { audioContext, contextSampleRate } from '../audio/context.js'
+import { audioContext, contextSampleRate, createBiquadFilter } from '../audio/context.js'
 import { addNotes, createTempBuffer, getOffsetForBar } from '../audio/musicUtils.js'
 import { trianglePluck } from './mainSongSounds/trianglePluck.js'
-import { decibelsToAmplitude } from '../audio/utils.js'
 import { detuned } from './mainSongSounds/detuned.js'
 import { lead1, lead2 } from './mainSongSounds/leads.js'
 import { kick } from './mainSongSounds/kick.js'
@@ -500,13 +499,11 @@ function createHihats () {
 
   const loop = createTempBuffer(4, bpm)
   addNotes([
-    [0, 0, 0, 0.1],
+    [0, 0, 0, 0.5],
     [0.5, 0, 0, 1],
-    [1, 0, 0, 0.03],
     [1.5, 0, 0, 1],
-    [2, 0, 0, 0.1],
-    [2.5, 0, 0, 1],
-    [3, 0, 0, 0.03],
+    [2, 0, 0, 1],
+    [2.5, 0, 0, 0.5],
     [3.5, 0, 0, 1]
   ], loop, hihat, bpm)
 
@@ -586,6 +583,9 @@ function createChannel (buffer) {
 export const kickStart = 40
 export const kickFade = 2
 
+export const snareStart = 45
+export const snareFade = 2
+
 export async function generateSong () {
   const arpsChannel = createChannel(createTrack1())
   await waitForNextFrame()
@@ -621,34 +621,31 @@ export async function generateSong () {
       hihatChannel.start()
       chordsChannel.start()
 
-      audioMix.addMusicChannel(-1, 0, arpsChannel, decibelsToAmplitude(-18), decibelsToAmplitude(0))
-      audioMix.addMusicChannel(6, 8, bassChannel, decibelsToAmplitude(-12), 0)
-      audioMix.addMusicChannel(16, 18, subtlePadChannel, decibelsToAmplitude(-16.5), decibelsToAmplitude(0))
+      audioMix.addMusicChannel(-1, 0, arpsChannel, 0.125 /*decibelsToAmplitude(-18)*/, 1 /*decibelsToAmplitude(0)*/)
+      audioMix.addMusicChannel(6, 8, bassChannel, 0.25 /*decibelsToAmplitude(-12)*/, 0)
+      audioMix.addMusicChannel(16, 18, subtlePadChannel, 0.15 /*decibelsToAmplitude(-16.5)*/, 1 /*decibelsToAmplitude(0)*/)
 
-      audioMix.addMusicChannel(25, 27, softLeadChannel, decibelsToAmplitude(-12), decibelsToAmplitude(0))
+      audioMix.addMusicChannel(25, 27, softLeadChannel, 0.25 /*decibelsToAmplitude(-12)*/, 1 /*decibelsToAmplitude(0)*/)
 
-      audioMix.addMusicChannel(kickStart, kickStart + kickFade, kickChannel, decibelsToAmplitude(-16), 0)
-      audioMix.addMusicChannel(45, 47, snareChannel, decibelsToAmplitude(-22), decibelsToAmplitude(-10))
-      audioMix.addMusicChannel(45, 47, hihatChannel, decibelsToAmplitude(-24), decibelsToAmplitude(-10))
+      audioMix.addMusicChannel(kickStart, kickStart + kickFade, kickChannel, 0.16 /*decibelsToAmplitude(-16)*/, 0)
+      audioMix.addMusicChannel(snareStart, snareStart + snareFade, snareChannel, 0.08 /*decibelsToAmplitude(-22)*/, 0.31 /*decibelsToAmplitude(-10)*/)
 
-      const filter2 = audioContext.createBiquadFilter()
-      filter2.type = 'peaking'
-      filter2.frequency.value = 557
-      filter2.gain.value = -7.6
-      filter2.Q.value = 1.33
+      const hihatsFilter = createBiquadFilter('highpass', 5000)
+      hihatChannel.connect(hihatsFilter)
 
-      chordsChannel.connect(filter2)
+      audioMix.addMusicChannel(45, 47, hihatsFilter, 0.06 /*decibelsToAmplitude(-24)*/, 0.31 /*decibelsToAmplitude(-10)*/)
 
-      audioMix.addMusicChannel(55, 57, filter2, decibelsToAmplitude(-16.5), decibelsToAmplitude(-10))
+      const chordsFilter = createBiquadFilter('peaking', 557, 1.33, -7.6)
+      chordsChannel.connect(chordsFilter)
 
-      const filter = audioContext.createBiquadFilter()
-      filter.type = 'lowpass'
-      filter.frequency.value = 5000
+      audioMix.addMusicChannel(55, 57, chordsFilter, 0.15 /*decibelsToAmplitude(-16.5)*/, 0.31 /*decibelsToAmplitude(-10)*/)
 
-      lead1Channel.connect(filter)
-      lead2Channel.connect(filter)
+      const leadsFilter = createBiquadFilter('lowpass', 5000)
 
-      audioMix.addMusicChannel(75, 77, filter, decibelsToAmplitude(-26), decibelsToAmplitude(0))
+      lead1Channel.connect(leadsFilter)
+      lead2Channel.connect(leadsFilter)
+
+      audioMix.addMusicChannel(75, 77, leadsFilter, 0.05 /*decibelsToAmplitude(-26)*/, 1 /*decibelsToAmplitude(0)*/)
     }
   }
 }
