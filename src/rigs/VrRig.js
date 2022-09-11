@@ -1,34 +1,44 @@
 import { XR } from '../core/XrContext.js'
-import { camera, head } from '../core/camera.js'
+import { head, moveHead } from '../core/camera.js'
 import { fromXYZW, quat, quatInvert, quatMultiply, setFromUnitVectors } from '../math/quat.js'
 import { applyQuat, length, vec3, vec3Normalize } from '../math/vec3.js'
+import { updateMouseDown } from './controls.js'
 
 export const vrRig = {
   prevAxes: [vec3(), vec3()],
-  controlsActive: true,
+  controlsActive: false,
 
   startControls () {
     vrRig.controlsActive = true
+
+    XR.session.addEventListener('selectstart', vrRig.onSelectStart)
+    XR.session.addEventListener('selectend', vrRig.onSelectEnd)
   },
 
   pauseControls () {
     vrRig.controlsActive = false
+    XR.session.removeEventListener('selectstart', vrRig.onSelectStart)
+    XR.session.removeEventListener('selectend', vrRig.onSelectEnd)
+  },
+
+  onSelectStart () {
+    updateMouseDown(true)
+  },
+
+  onSelectEnd () {
+    updateMouseDown(false)
   },
 
   update (frame) {
+    head.eyesQuaternion = fromXYZW(frame['getViewerPose'](XR.startRefSpace)['views'][0]['transform']['orientation'])
+
     if (vrRig.controlsActive) {
       const inputSources = XR.session['inputSources']
       for (let i = 0; i < Math.min(2, inputSources.length); i++) {
         const inputSource = inputSources[i]
         const currentAxis = vec3([inputSource.gamepad.axes[2], inputSource.gamepad.axes[3], 0])
         if (length(currentAxis) > 0.5 && length(vrRig.prevAxes[i]) < 0.2) {
-          const movementVector = vec3([-currentAxis[0], currentAxis[1], 2.0])
-
-          vec3Normalize(movementVector)
-
-          const rotation = quat()
-          setFromUnitVectors(rotation, vec3([0, 0, 1]), movementVector)
-          quatMultiply(head.quaternion, head.quaternion, rotation)
+          moveHead(vec3([-currentAxis[0], currentAxis[1], 2.0]))
         }
 
         vrRig.prevAxes[i].set(currentAxis)
@@ -56,25 +66,5 @@ export const vrRig = {
     const refSpace = XR.startRefSpace['getOffsetReferenceSpace'](transform)
 
     XR.pose = frame['getViewerPose'](refSpace)
-
-    camera.updateViewMatrix()
-
-    head.eyesQuaternion = fromXYZW(frame['getViewerPose'](XR.startRefSpace)['views'][0]['transform']['orientation'])
-
-    // const orientation = quatFromMat4(quat(), camera.viewMatrix)
-    //
-    // const transform = new window['XRRigidTransform'](
-    //   {
-    //     x: camera.viewMatrix[12],
-    //     y: camera.viewMatrix[13],
-    //     z: camera.viewMatrix[14]
-    //   },
-    //   {
-    //     x: orientation[0],
-    //     y: orientation[1],
-    //     z: orientation[2],
-    //     w: orientation[3],
-    //   }
-    // )
   }
 }

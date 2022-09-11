@@ -60,7 +60,7 @@ export const VrLoop = {
     for (const view of XR.pose['views']) {
       camera.projectionMatrix = view['projectionMatrix']
       camera.viewMatrix = view['transform']['inverse']['matrix']
-      // camera.matrix = view['transform']['matrix']
+      camera.matrix = view['transform']['matrix']
 
       let viewport = baseLayer['getViewport'](view)
       gl.viewport(viewport.x, viewport.y, viewport.width, viewport.height)

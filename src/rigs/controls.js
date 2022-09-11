@@ -5,6 +5,9 @@ export function setRig (rig) {
 }
 
 export let mouseDown = false
+export function updateMouseDown (value) {
+  mouseDown = value
+}
 
 let previousTouches = {}
 

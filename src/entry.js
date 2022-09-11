@@ -8,10 +8,14 @@ import { noiseSound } from './assets/noiseSound.js'
 import { setMainScene } from './world/main.js'
 import { activeRig } from './rigs/controls.js'
 
-function start () {
+async function start () {
   audioContext.resume()
+
+  await activeRig.startControls()
+
   mainSong.start()
   noiseSound.start()
+
   setMainScene()
 }
 
@@ -22,18 +26,16 @@ initAssets().then(() => {
     DefaultLoop.start()
   }
 
-  vrButton.onclick = () => {
+  vrButton.onclick = async () => {
     DefaultLoop.stop()
-    VrLoop.start()
-
-    start()
+    await VrLoop.start()
+    await start()
   }
 
   startButton.onclick = async () => {
     startScreen.hidden = true
-    await activeRig.startControls()
 
-    start()
+    await start()
   }
 
   DefaultLoop.start()

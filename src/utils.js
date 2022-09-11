@@ -1,3 +1,5 @@
+import { loading } from './ui.js'
+
 let reloading = false
 
 export function reload () {
@@ -57,4 +59,11 @@ export function getRandomBrightColor () {
  * Waiting for the next frame is useful for preventing the browser to hang
  * while the assets are being generated
  */
-export const waitForNextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
+export const updateInitProgress = () => new Promise(resolve => {
+  loading.textContent += '.'
+  requestAnimationFrame(resolve)
+})
+
+export function getRandomDirection () {
+  return [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]
+}

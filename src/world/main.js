@@ -58,17 +58,20 @@ export function updateScene () {
 
   addScaled(head.position, head.position, forward, scale * CAMERA_SPEED * deltaTime)
 
-  if (state !== STATE_WINNING && distance(head.position, focus) < VIEW_DISTANCE) {
-    updateFocus()
-  }
-
-  updateParticles()
 
   if (state === STATE_MENU) {
     introUpdate()
   } else {
     mainUpdate()
   }
+
+  if (state !== STATE_WINNING && distance(head.position, focus) < VIEW_DISTANCE) {
+    updateFocus()
+  }
+
+  camera.updateViewMatrix()
+
+  updateParticles()
 }
 
 export function introUpdate () {
@@ -76,6 +79,8 @@ export function introUpdate () {
     resetPosition()
   }
 }
+
+let fadeOut = 0
 
 export function mainUpdate () {
   updateTime()
@@ -118,7 +123,12 @@ export function mainUpdate () {
 
   updateExperience()
 
-  audioMix.setMusicProgress(progress)
+  if (state === STATE_WINNING) {
+    fadeOut += deltaTime
+    audioMix.setMusicEnd(fadeOut / 5)
+  } else {
+    audioMix.setMusicProgress(progress)
+  }
   audioMix.setMusicVolume(musicVolume)
   audioMix.setFxVolume(noiseVolume)
 }
@@ -165,12 +175,12 @@ export function renderUi () {
   if (finalStateText) {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
     uiTextMaterial.shader.bind()
-    uiTextMaterial.setTexture(finalStateText.texture)
+    uiTextMaterial.setTexture(finalStateText)
     uiTextMaterial.updateCameraUniforms()
 
     const model = mat4([
       1, 0, 0, 0,
-      0, 1 / finalStateText.ratio, -0.05, 0,
+      0, 1, -0.05, 0,
       0, -0.05, 1, 0,
       0, 0, -10 * (1 - fadeAmount) ** 2 - 5, 1
     ])

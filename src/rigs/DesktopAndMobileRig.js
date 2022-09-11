@@ -1,4 +1,4 @@
-import { camera, head } from '../core/camera.js'
+import { camera, head, moveHead } from '../core/camera.js'
 import { canvas } from '../core/context.js'
 import { quat, quatInvert, quatMultiply, setFromAxisAngle, setFromUnitVectors } from '../math/quat.js'
 import { vec3, vec3Normalize } from '../math/vec3.js'
@@ -78,19 +78,7 @@ export const desktopAndMobileRig = {
     desktopAndMobileRig.deltaX = 0
     desktopAndMobileRig.deltaY = 0
 
-    vec3Normalize(movementVector)
-
-    const rotation = quat()
-
-    // applyQuat(movementVector, movementVector, head.eyesQuaternion)
-    // setFromUnitVectors(rotation, applyQuat(vec3(), vec3([0, 0, 1]), head.eyesQuaternion), movementVector)
-
-    setFromUnitVectors(rotation, vec3([0, 0, 1]), movementVector)
-    quatMultiply(rotation, quatMultiply(rotation, head.eyesQuaternion, rotation), quatInvert(quat(), head.eyesQuaternion))
-
-    quatMultiply(head.quaternion, head.quaternion, rotation)
-
-    camera.updateViewMatrix()
+    moveHead(movementVector)
   },
 
   onMouseMove (event) {

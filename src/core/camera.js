@@ -1,6 +1,6 @@
 import { mat4, mat4Invert, setRotMatFromQuat } from '../math/mat4.js'
-import { vec3 } from '../math/vec3.js'
-import { quat, quatMultiply } from '../math/quat.js'
+import { vec3, vec3Normalize } from '../math/vec3.js'
+import { quat, quatInvert, quatMultiply, setFromUnitVectors } from '../math/quat.js'
 
 export const head = {
   position: vec3(),
@@ -8,11 +8,22 @@ export const head = {
   eyesQuaternion: quat()
 }
 
+export function moveHead (movementVector) {
+  vec3Normalize(movementVector)
+
+  const rotation = quat()
+  setFromUnitVectors(rotation, vec3([0, 0, 1]), movementVector)
+  quatMultiply(rotation, quatMultiply(rotation, head.eyesQuaternion, rotation), quatInvert(quat(), head.eyesQuaternion))
+
+  quatMultiply(head.quaternion, head.quaternion, rotation)
+}
+
 export const camera = {
   projectionMatrix: mat4(),
   viewMatrix: mat4(),
   matrix: mat4(),
 
+  // For non-VR!
   updateViewMatrix () {
     setRotMatFromQuat(camera.matrix, quatMultiply(quat(), head.quaternion, head.eyesQuaternion))
 

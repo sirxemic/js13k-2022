@@ -1,5 +1,4 @@
 import { Material } from '../core/graphics/Material.js'
-import { particleTexture } from './particle.js'
 import {
   attributeColor,
   attributeParticleProperties,
@@ -10,7 +9,6 @@ import {
   uniformModel,
   uniformProjection,
   uniformSnare,
-  uniformTextures,
   uniformView,
   varyingColor,
   varyingDistance,
@@ -33,7 +31,8 @@ float ga = ${VIEW_DISTANCE}.0;
 vec4 shader() {
   float b = 1.0 + ${uniformKick};
   float a = clamp((ga - ${varyingDistance}) / (ga - fba), 0.0, 1.0);
-  return texture(${uniformTextures}[0], gl_PointCoord.xy) * vec4(${varyingColor}, 1.0) * b * a;
+  float r = 2.0 * length(gl_PointCoord.xy - 0.5);
+  return exp(-5.0 * r * r) * (r < 0.05 ? 1.0 : 0.05 / r) * vec4(${varyingColor}, 1.0) * b * a;
 }
 `, `/*glsl*/
 layout(location = 1) in vec2 ${attributeParticleProperties};
@@ -55,6 +54,4 @@ void main() {
   gl_PointSize = (1.0 + mix(${uniformKick}, ${uniformSnare}, ${attributeParticleProperties}.y)) * ${2000 * SCALE}.0 / -m.z;
 }
 `)
-
-  particleMaterial.setTexture(particleTexture)
 }

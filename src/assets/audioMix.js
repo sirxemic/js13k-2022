@@ -50,6 +50,13 @@ export function generateAudioMix () {
         const mix = saturate((amount - channel.fadeMin) / (channel.fadeMax - channel.fadeMin))
         channel.controller.gain.setValueAtTime(0.00001 * (100000 ** mix), audioContext.currentTime)
       }
+    },
+
+    setMusicEnd (amount) {
+      for (let i = 0; i < channels.length; i++) {
+        const mix = saturate(i + 1 - amount)
+        channels[i].controller.gain.setValueAtTime(0.00001 * (100000 ** mix), audioContext.currentTime)
+      }
     }
   }
 }

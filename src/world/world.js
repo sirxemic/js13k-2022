@@ -1,19 +1,29 @@
 import { draw } from '../core/renderer.js'
-import { head } from '../core/camera.js'
+import { camera, head } from '../core/camera.js'
 import { gl } from '../core/context.js'
 import { skyboxMaterial } from '../assets/skyboxMaterial.js'
-import { cube } from '../assets/cube.js'
+import { skyGeometry } from '../assets/skyGeometry.js'
 import { VertexBuffer } from '../core/graphics/VertexBuffer.js'
 import { particleMaterial } from '../assets/particleMaterial.js'
-import { mat4 } from '../math/mat4.js'
+import { mat4, setRotMatFromQuat } from '../math/mat4.js'
 import { addScaled, distance, length, subtract, vec3, vec3Lerp, vec3Normalize } from '../math/vec3.js'
-import { uniformFocusPosition, uniformKick, uniformSnare, uniformTime } from '../core/constants.js'
+import {
+  uniformColor,
+  uniformFocusAmount,
+  uniformFocusPosition,
+  uniformKick,
+  uniformSnare,
+  uniformTime
+} from '../core/constants.js'
 import { startTrack } from './track.js'
 import { Material } from '../core/graphics/Material.js'
 import { FLOW_RADIUS, PARTICLE_SPEED, STRONG_FLOW_RADIUS, VIEW_DISTANCE } from '../constants.js'
-import { getRandomBrightColor } from '../utils.js'
+import { getRandomBrightColor, getRandomDirection } from '../utils.js'
 import { saturate } from '../math/math.js'
 import { deltaTime } from '../core/core.js'
+import { galaxyMaterial } from '../assets/galaxyMaterial.js'
+import { quad } from '../assets/quad.js'
+import { quat, quatMultiply, setFromAxisAngle, setFromUnitVectors } from '../math/quat.js'
 
 export let currentTime = 0
 export let kickVizAmount = 0
@@ -21,6 +31,23 @@ export let snareVizAmount = 0
 export let currentTrack = startTrack
 export let focus = vec3()
 export let progress = 0
+
+const galaxies = Array.from({ length: 50 }, () => {
+  const position = getRandomDirection()
+  const rotation = setFromAxisAngle(quat(), [0, 0, 1], Math.random() * Math.PI)
+  const placement = setFromUnitVectors(quat(), [0, 0, 1], vec3Normalize(position))
+  const size = 5 + Math.random() * 20
+
+  quatMultiply(rotation, placement, rotation)
+  const model = setRotMatFromQuat(mat4(), rotation)
+  for (let i = 0; i < 12; i++) {
+    model[i] *= size
+  }
+  model[12] = position[0] * 50
+  model[13] = position[1] * 50
+  model[14] = position[2] * 50
+  return [model, vec3([...getRandomBrightColor(), 1.0])]
+})
 
 // <debug>
 const trackMesh = new VertexBuffer(gl.LINE_STRIP)
@@ -115,7 +142,7 @@ export function updateParticles () {
     }
 
     if (distance(pos, focus) > VIEW_DISTANCE * 1.5 || particleStateData[i * 4 + 3] > 1) {
-      const offset = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]
+      const offset = getRandomDirection()
       vec3Normalize(offset)
 
       addScaled(pos, head.position, offset, VIEW_DISTANCE)
@@ -133,23 +160,50 @@ export function updateParticles () {
 }
 
 export function renderWorld () {
+  const dist = distance(head.position, focus)
+
+  const FADE_START = FLOW_RADIUS
+  const FADE_RANGE = VIEW_DISTANCE - FLOW_RADIUS
+
+  const focusAmount = saturate(1 - (dist - FADE_START) / (FADE_RANGE / 2))
+
   gl.depthMask(false)
   skyboxMaterial.updateCameraUniforms()
   skyboxMaterial.setModel(mat4([
     -500.0, 0.0, 0.0, 0.0,
     0.0, -500.0, 0.0, 0.0,
     0.0, 0.0, -500.0, 0.0,
-    ...head.position, 1.0
+    ...camera.matrix.slice(12, 15), 1.0
   ]))
   skyboxMaterial.shader.set1f(uniformTime, currentTime)
   skyboxMaterial.shader.set1f(uniformKick, kickVizAmount)
   skyboxMaterial.shader.set1f(uniformSnare, snareVizAmount)
-  draw(cube, skyboxMaterial)
+  skyboxMaterial.shader.set1f(uniformFocusAmount, focusAmount)
+  draw(skyGeometry, skyboxMaterial)
 
   gl.enable(gl.BLEND)
+  gl.blendFunc(gl.ONE, gl.ONE)
   gl.disable(gl.DEPTH_TEST)
   gl.depthMask(false)
-  gl.blendFunc(gl.ONE, gl.ONE)
+
+  galaxyMaterial.updateCameraUniforms()
+
+  for (let i = 0; i < galaxies.length; i++) {
+    const [galaxyModel, color] = galaxies[i]
+    const model = mat4(galaxyModel)
+    model[12] += camera.matrix[12]
+    model[13] += camera.matrix[13]
+    model[14] += camera.matrix[14]
+
+    galaxyMaterial.setModel(model)
+    galaxyMaterial.shader.set1f(uniformKick, kickVizAmount)
+    galaxyMaterial.shader.set1f(uniformSnare, snareVizAmount)
+    galaxyMaterial.shader.set4fv(uniformColor, color)
+    galaxyMaterial.shader.set1f(uniformFocusAmount, focusAmount)
+    galaxyMaterial.shader.set1f(uniformTime, 0.2 * currentTime)
+    draw(quad, galaxyMaterial)
+  }
+
   particleMaterial.updateCameraUniforms()
   particleMaterial.setModel(mat4())
   particleMaterial.shader.set3fv(uniformFocusPosition, focus)

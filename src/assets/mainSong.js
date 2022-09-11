@@ -8,7 +8,7 @@ import { kick } from './mainSongSounds/kick.js'
 import { snare } from './mainSongSounds/snare.js'
 import { chords } from './mainSongSounds/chords.js'
 import { hihat, sweep } from './mainSongSounds/hihats.js'
-import { waitForNextFrame } from '../utils.js'
+import { updateInitProgress } from '../utils.js'
 
 export let mainSong
 
@@ -588,25 +588,25 @@ export const snareFade = 2
 
 export async function generateSong () {
   const arpsChannel = createChannel(createTrack1())
-  await waitForNextFrame()
+  await updateInitProgress()
   const bassChannel = createChannel(createTrack2())
-  await waitForNextFrame()
+  await updateInitProgress()
   const subtlePadChannel = createChannel(createTrack3())
-  await waitForNextFrame()
+  await updateInitProgress()
   const softLeadChannel = createChannel(createTrack4())
-  await waitForNextFrame()
+  await updateInitProgress()
   const lead1Channel = createChannel(createTrack5())
-  await waitForNextFrame()
+  await updateInitProgress()
   const lead2Channel = createChannel(createTrack6())
-  await waitForNextFrame()
+  await updateInitProgress()
   const kickChannel = createChannel(createKick())
-  await waitForNextFrame()
+  await updateInitProgress()
   const snareChannel = createChannel(createSnare())
-  await waitForNextFrame()
+  await updateInitProgress()
   const hihatChannel = createChannel(createHihats())
-  await waitForNextFrame()
+  await updateInitProgress()
   const chordsChannel = createChannel(createChords())
-  await waitForNextFrame()
+  await updateInitProgress()
 
   mainSong = {
     start () {
@@ -628,12 +628,12 @@ export async function generateSong () {
       audioMix.addMusicChannel(25, 27, softLeadChannel, 0.25 /*decibelsToAmplitude(-12)*/, 1 /*decibelsToAmplitude(0)*/)
 
       audioMix.addMusicChannel(kickStart, kickStart + kickFade, kickChannel, 0.16 /*decibelsToAmplitude(-16)*/, 0)
-      audioMix.addMusicChannel(snareStart, snareStart + snareFade, snareChannel, 0.08 /*decibelsToAmplitude(-22)*/, 0.31 /*decibelsToAmplitude(-10)*/)
 
       const hihatsFilter = createBiquadFilter('highpass', 5000)
       hihatChannel.connect(hihatsFilter)
 
-      audioMix.addMusicChannel(45, 47, hihatsFilter, 0.06 /*decibelsToAmplitude(-24)*/, 0.31 /*decibelsToAmplitude(-10)*/)
+      audioMix.addMusicChannel(snareStart, snareStart + snareFade, hihatsFilter, 0.06 /*decibelsToAmplitude(-24)*/, 0.31 /*decibelsToAmplitude(-10)*/)
+      audioMix.addMusicChannel(snareStart, snareStart + snareFade, snareChannel, 0.08 /*decibelsToAmplitude(-22)*/, 0.31 /*decibelsToAmplitude(-10)*/)
 
       const chordsFilter = createBiquadFilter('peaking', 557, 1.33, -7.6)
       chordsChannel.connect(chordsFilter)
