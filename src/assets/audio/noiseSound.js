@@ -1,6 +1,6 @@
-import { audioContext, createBiquadFilter, createGain } from '../audio/context.js'
-import { sampleNoise } from '../audio/utils.js'
-import { audioMix } from './audioMix.js'
+import { audioContext, createBiquadFilter, createGain } from '../../audio/context.js'
+import { sampleNoise } from '../../audio/utils.js'
+import { audioMix } from '../audioMix.js'
 
 export let noiseSound
 

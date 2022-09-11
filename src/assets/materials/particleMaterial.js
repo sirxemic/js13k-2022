@@ -1,4 +1,4 @@
-import { Material } from '../core/graphics/Material.js'
+import { Material } from '../../core/graphics/Material.js'
 import {
   attributeColor,
   attributeParticleProperties,
@@ -13,8 +13,8 @@ import {
   varyingColor,
   varyingDistance,
   varyingPosition
-} from '../core/constants.js'
-import { SCALE, VIEW_DISTANCE } from '../constants.js'
+} from '../../core/constants.js'
+import { SCALE, VIEW_DISTANCE } from '../../constants.js'
 
 export let particleMaterial
 
@@ -35,23 +35,23 @@ vec4 shader() {
   return exp(-5.0 * r * r) * (r < 0.05 ? 1.0 : 0.05 / r) * vec4(${varyingColor}, 1.0) * b * a;
 }
 `, `/*glsl*/
-layout(location = 1) in vec2 ${attributeParticleProperties};
+layout(location = 1) in float ${attributeParticleProperties};
 layout(location = 2) in vec3 ${attributeColor};
 
 uniform vec3 ${uniformFocusPosition};
 uniform float ${uniformKick};
-uniform float ${uniformSnare};
 
 out float ${varyingDistance};
 out vec3 ${varyingColor};
 
 void main() {
-  ${varyingPosition} = vec3(${uniformModel} * vec4(${attributePosition}, 1.0));
-  gl_Position = ${uniformProjection} * ${uniformView} * vec4(${varyingPosition}, 1.0);
+  ${varyingPosition} = ${attributePosition};
+  vec4 m = ${uniformView} * vec4(${attributePosition}, 1.0);
+  gl_Position = ${uniformProjection} * m;
+  float a = clamp((m.z + 10.0) / -10.0, 0.0, 1.0);
+  gl_PointSize = (1.0 + ${uniformKick}) * ${2000 * SCALE}.0 / -m.z;
   ${varyingDistance} = max(length(${uniformHeadPosition} - ${varyingPosition}), length(${uniformFocusPosition} - ${varyingPosition}));
-  ${varyingColor} = min(vec3(${attributeParticleProperties}.x), ${attributeColor} * 5.0);
-  vec4 m = ${uniformView} * ${uniformModel} * vec4(${attributePosition}, 1.0);
-  gl_PointSize = (1.0 + mix(${uniformKick}, ${uniformSnare}, ${attributeParticleProperties}.y)) * ${2000 * SCALE}.0 / -m.z;
+  ${varyingColor} = a * min(vec3(${attributeParticleProperties}), ${attributeColor} * 5.0);
 }
 `)
 }

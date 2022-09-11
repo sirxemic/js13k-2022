@@ -1,16 +1,17 @@
-import { generateNoiseTexture } from './assets/noise.js'
-import { loadSkyboxMaterial } from './assets/skyboxMaterial.js'
-import { loadParticleMaterial } from './assets/particleMaterial.js'
-import { generateSong } from './assets/mainSong.js'
-import { generateReverbIR } from './assets/reverbIR.js'
+import { generateNoiseTexture } from './assets/textures/noise.js'
+import { loadSkyboxMaterial } from './assets/materials/skyboxMaterial.js'
+import { loadParticleMaterial } from './assets/materials/particleMaterial.js'
+import { generateSong } from './assets/audio/mainSong.js'
+import { generateReverbIR } from './assets/audio/reverbIR.js'
 import { generateAudioMix } from './assets/audioMix.js'
 import { updateInitProgress } from './utils.js'
-import { generateNoiseSound } from './assets/noiseSound.js'
-import { loadFadeMaterial } from './assets/fadeMaterial.js'
-import { generateTexts } from './assets/texts.js'
-import { loadUiTextMaterial } from './assets/uiTextMaterial.js'
-import { generateGalaxy } from './assets/galaxy.js'
-import { loadGalaxyMaterial } from './assets/galaxyMaterial.js'
+import { generateNoiseSound } from './assets/audio/noiseSound.js'
+import { loadFadeMaterial } from './assets/materials/fadeMaterial.js'
+import { generateTexts } from './assets/textures/texts.js'
+import { loadUiTextMaterial } from './assets/materials/uiTextMaterial.js'
+import { generateGalaxy } from './assets/textures/galaxy.js'
+import { loadGalaxyMaterial } from './assets/materials/galaxyMaterial.js'
+import { loadGoalMaterial } from './assets/materials/goalMaterial.js'
 
 export async function initAssets () {
   // Textures
@@ -28,6 +29,7 @@ export async function initAssets () {
   loadUiTextMaterial()
   loadGalaxyMaterial()
   loadSkyboxMaterial()
+  loadGoalMaterial()
 
   // Audio
   generateReverbIR()

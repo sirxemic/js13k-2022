@@ -1,7 +1,7 @@
 import { renderUi, updateScene } from '../world/main.js'
 import { gl } from './context.js'
 import { vrRig } from '../rigs/VrRig.js'
-import { camera } from './camera.js'
+import { camera, depthFar, depthNear } from './camera.js'
 import { XR } from './XrContext.js'
 import { renderWorld } from '../world/world.js'
 import { setRig } from '../rigs/controls.js'
@@ -24,7 +24,7 @@ export const VrLoop = {
     )
     baseLayer = new window['XRWebGLLayer'](XR.session, gl)
 
-    XR.session['updateRenderState']({ 'baseLayer': baseLayer })
+    XR.session['updateRenderState']({ 'baseLayer': baseLayer, 'depthNear': depthNear, 'depthFar': depthFar })
 
     XR.session.addEventListener('end', () => {
       XR.session = null

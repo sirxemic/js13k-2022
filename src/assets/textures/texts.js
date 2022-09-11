@@ -1,6 +1,6 @@
-import { Texture } from '../core/graphics/Texture.js'
-import { gl } from '../core/context.js'
-import { getImageDataFromSvgCode, svg, text as svgText } from '../svg.js'
+import { Texture } from '../../core/graphics/Texture.js'
+import { gl } from '../../core/context.js'
+import { getImageDataFromSvgCode, svg, text as svgText } from '../../svg.js'
 
 export let winText
 export let loseText
@@ -18,6 +18,6 @@ export async function generateText (text, color) {
 }
 
 export async function generateTexts () {
-  winText = await generateText('Ascended', '#000')
+  winText = await generateText('Nice!\nYou’ve ascended!', '#000')
   loseText = await generateText('Forever lost\nin limbo', '#fff')
 }

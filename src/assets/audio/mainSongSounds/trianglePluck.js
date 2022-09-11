@@ -1,4 +1,4 @@
-import { applyEnvelope, generateSound, getFrequencyDelta, sampleTriangle } from '../../audio/utils.js'
+import { applyEnvelope, generateSound, getFrequencyDelta, sampleTriangle } from '../../../audio/utils.js'
 
 const trianglePluckEnvelope = [
   [0, 0],

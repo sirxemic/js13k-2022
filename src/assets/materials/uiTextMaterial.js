@@ -1,4 +1,4 @@
-import { Material } from '../core/graphics/Material.js'
+import { Material } from '../../core/graphics/Material.js'
 import {
   attributePosition,
   uniformModel,
@@ -7,7 +7,7 @@ import {
   uniformView,
   varyingPosition,
   varyingUv
-} from '../core/constants.js'
+} from '../../core/constants.js'
 
 export let uiTextMaterial
 

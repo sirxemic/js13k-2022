@@ -1,4 +1,4 @@
-import { VertexBuffer } from '../core/graphics/VertexBuffer.js'
+import { VertexBuffer } from '../../core/graphics/VertexBuffer.js'
 
 export const quad = new VertexBuffer()
 quad.vertexLayout([3])

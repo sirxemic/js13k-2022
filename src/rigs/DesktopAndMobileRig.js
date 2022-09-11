@@ -1,4 +1,4 @@
-import { camera, head, moveHead } from '../core/camera.js'
+import { camera, depthFar, depthNear, head, moveHead } from '../core/camera.js'
 import { canvas } from '../core/context.js'
 import { quat, quatInvert, quatMultiply, setFromAxisAngle, setFromUnitVectors } from '../math/quat.js'
 import { vec3, vec3Normalize } from '../math/vec3.js'
@@ -21,17 +21,15 @@ export const desktopAndMobileRig = {
   deltaY: 0,
 
   start () {
-    const near = 0.1
-    const far = 1000
     const aspect = canvas.width / canvas.height
     const f = 1 / Math.tan(fovY / 2)
-    const nf = 1 / (near - far)
+    const nf = 1 / (depthNear - depthFar)
 
     camera.projectionMatrix = mat4([
       f / aspect, 0, 0, 0,
       0, f, 0, 0,
-      0, 0, (far + near) * nf, -1,
-      0, 0, 2 * far * near * nf, 0
+      0, 0, (depthFar + depthNear) * nf, -1,
+      0, 0, 2 * depthFar * depthNear * nf, 0
     ])
   },
 

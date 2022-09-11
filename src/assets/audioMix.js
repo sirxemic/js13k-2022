@@ -1,5 +1,5 @@
 import { audioContext, audioDestination, createGain } from '../audio/context.js'
-import { reverbIR } from './reverbIR.js'
+import { reverbIR } from './audio/reverbIR.js'
 import { saturate } from '../math/math.js'
 
 export let audioMix
@@ -54,7 +54,7 @@ export function generateAudioMix () {
 
     setMusicEnd (amount) {
       for (let i = 0; i < channels.length; i++) {
-        const mix = saturate(i + 1 - amount)
+        const mix = saturate(1 + i - amount)
         channels[i].controller.gain.setValueAtTime(0.00001 * (100000 ** mix), audioContext.currentTime)
       }
     }

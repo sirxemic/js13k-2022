@@ -1,4 +1,4 @@
-import { applyEnvelope, createAudioBuffer, generateSound, sampleNoise } from '../audio/utils.js'
+import { applyEnvelope, createAudioBuffer, generateSound, sampleNoise } from '../../audio/utils.js'
 
 export let reverbIR
 

@@ -1,6 +1,6 @@
-import { audioMix } from './audioMix.js'
-import { audioContext, contextSampleRate, createBiquadFilter } from '../audio/context.js'
-import { addNotes, createTempBuffer, getOffsetForBar } from '../audio/musicUtils.js'
+import { audioMix } from '../audioMix.js'
+import { audioContext, contextSampleRate, createBiquadFilter } from '../../audio/context.js'
+import { addNotes, createTempBuffer, getOffsetForBar } from '../../audio/musicUtils.js'
 import { trianglePluck } from './mainSongSounds/trianglePluck.js'
 import { detuned } from './mainSongSounds/detuned.js'
 import { lead1, lead2 } from './mainSongSounds/leads.js'
@@ -8,7 +8,7 @@ import { kick } from './mainSongSounds/kick.js'
 import { snare } from './mainSongSounds/snare.js'
 import { chords } from './mainSongSounds/chords.js'
 import { hihat, sweep } from './mainSongSounds/hihats.js'
-import { updateInitProgress } from '../utils.js'
+import { updateInitProgress } from '../../utils.js'
 
 export let mainSong
 
@@ -42,7 +42,7 @@ function formatLoop (loop, transpose = 0, offset = 0) {
   return result
 }
 
-function createTrack1 () {
+function createArpsTrack () {
   const trackBuffer = monoBuffer()
 
   const result = trackBuffer.getChannelData(0)
@@ -132,7 +132,7 @@ const detunedNotes = [
   [15.5, 3, 1.5],
 ]
 
-function createTrack2 () {
+function createBassTrack () {
   const trackBuffer = stereoBuffer()
 
   currentScale = scale1
@@ -146,7 +146,7 @@ function createTrack2 () {
   return trackBuffer
 }
 
-function createTrack3 () {
+function createSubtlePadTrack () {
   const trackBuffer = stereoBuffer()
 
   currentScale = scale1
@@ -163,7 +163,7 @@ function createTrack3 () {
   return trackBuffer
 }
 
-function createTrack4() {
+function createSoftLeadTrack() {
   const trackBuffer = stereoBuffer()
 
   currentScale = scale1
@@ -268,7 +268,7 @@ const commonLead = [
   [123.83, 10, 0.16],
 ]
 
-function createTrack5 () {
+function createLead1Track () {
   const trackBuffer = monoBuffer()
 
   currentScale = scale1
@@ -388,7 +388,7 @@ function createTrack5 () {
   return trackBuffer
 }
 
-function createTrack6 () {
+function createLead2Track () {
   const trackBuffer = monoBuffer()
 
   currentScale = scale1
@@ -442,7 +442,7 @@ function createTrack6 () {
   return trackBuffer
 }
 
-function createKick () {
+function createKickTrack () {
   const trackBuffer = monoBuffer()
   const buffer = trackBuffer.getChannelData(0)
 
@@ -464,7 +464,7 @@ function createKick () {
 }
 
 
-function createSnare () {
+function createSnareTrack () {
   const trackBuffer = monoBuffer()
   const buffer = trackBuffer.getChannelData(0)
 
@@ -491,7 +491,7 @@ function createSnare () {
   return trackBuffer
 }
 
-function createHihats () {
+function createHihatsTrack () {
   const trackBuffer = monoBuffer()
   const buffer = trackBuffer.getChannelData(0)
 
@@ -521,7 +521,7 @@ function createHihats () {
   return trackBuffer
 }
 
-function createChords () {
+function createChordsTrack () {
   const trackBuffer = stereoBuffer()
 
   currentScale = scale1
@@ -580,32 +580,50 @@ function createChannel (buffer) {
   return channelOutput
 }
 
+export const bassStart = 6
+export const bassFade = 2
+
+export const subtlePadStart = 16
+export const subtlePadFade = 2
+
+export const softLeadStart = 25
+export const softLeadFade = 2
+
 export const kickStart = 40
 export const kickFade = 2
 
 export const snareStart = 45
 export const snareFade = 2
 
+export const hihatsStart = 48
+export const hihatsFade = 2
+
+export const chordsStart = 55
+export const chordsFade = 2
+
+export const leadsStart = 75
+export const leadsFade = 2
+
 export async function generateSong () {
-  const arpsChannel = createChannel(createTrack1())
+  const arpsChannel = createChannel(createArpsTrack())
   await updateInitProgress()
-  const bassChannel = createChannel(createTrack2())
+  const bassChannel = createChannel(createBassTrack())
   await updateInitProgress()
-  const subtlePadChannel = createChannel(createTrack3())
+  const subtlePadChannel = createChannel(createSubtlePadTrack())
   await updateInitProgress()
-  const softLeadChannel = createChannel(createTrack4())
+  const softLeadChannel = createChannel(createSoftLeadTrack())
   await updateInitProgress()
-  const lead1Channel = createChannel(createTrack5())
+  const lead1Channel = createChannel(createLead1Track())
   await updateInitProgress()
-  const lead2Channel = createChannel(createTrack6())
+  const lead2Channel = createChannel(createLead2Track())
   await updateInitProgress()
-  const kickChannel = createChannel(createKick())
+  const kickChannel = createChannel(createKickTrack())
   await updateInitProgress()
-  const snareChannel = createChannel(createSnare())
+  const snareChannel = createChannel(createSnareTrack())
   await updateInitProgress()
-  const hihatChannel = createChannel(createHihats())
+  const hihatChannel = createChannel(createHihatsTrack())
   await updateInitProgress()
-  const chordsChannel = createChannel(createChords())
+  const chordsChannel = createChannel(createChordsTrack())
   await updateInitProgress()
 
   mainSong = {
@@ -622,30 +640,30 @@ export async function generateSong () {
       chordsChannel.start()
 
       audioMix.addMusicChannel(-1, 0, arpsChannel, 0.125 /*decibelsToAmplitude(-18)*/, 1 /*decibelsToAmplitude(0)*/)
-      audioMix.addMusicChannel(6, 8, bassChannel, 0.25 /*decibelsToAmplitude(-12)*/, 0)
-      audioMix.addMusicChannel(16, 18, subtlePadChannel, 0.15 /*decibelsToAmplitude(-16.5)*/, 1 /*decibelsToAmplitude(0)*/)
+      audioMix.addMusicChannel(bassStart, bassStart + bassFade, bassChannel, 0.25 /*decibelsToAmplitude(-12)*/, 0)
+      audioMix.addMusicChannel(subtlePadStart, subtlePadStart + subtlePadFade, subtlePadChannel, 0.15 /*decibelsToAmplitude(-16.5)*/, 1 /*decibelsToAmplitude(0)*/)
 
-      audioMix.addMusicChannel(25, 27, softLeadChannel, 0.25 /*decibelsToAmplitude(-12)*/, 1 /*decibelsToAmplitude(0)*/)
+      audioMix.addMusicChannel(softLeadStart, softLeadStart + softLeadFade, softLeadChannel, 0.25 /*decibelsToAmplitude(-12)*/, 1 /*decibelsToAmplitude(0)*/)
 
       audioMix.addMusicChannel(kickStart, kickStart + kickFade, kickChannel, 0.16 /*decibelsToAmplitude(-16)*/, 0)
 
       const hihatsFilter = createBiquadFilter('highpass', 5000)
       hihatChannel.connect(hihatsFilter)
 
-      audioMix.addMusicChannel(snareStart, snareStart + snareFade, hihatsFilter, 0.06 /*decibelsToAmplitude(-24)*/, 0.31 /*decibelsToAmplitude(-10)*/)
+      audioMix.addMusicChannel(hihatsStart, hihatsStart + hihatsFade, hihatsFilter, 0.06 /*decibelsToAmplitude(-24)*/, 0.31 /*decibelsToAmplitude(-10)*/)
       audioMix.addMusicChannel(snareStart, snareStart + snareFade, snareChannel, 0.08 /*decibelsToAmplitude(-22)*/, 0.31 /*decibelsToAmplitude(-10)*/)
 
       const chordsFilter = createBiquadFilter('peaking', 557, 1.33, -7.6)
       chordsChannel.connect(chordsFilter)
 
-      audioMix.addMusicChannel(55, 57, chordsFilter, 0.15 /*decibelsToAmplitude(-16.5)*/, 0.31 /*decibelsToAmplitude(-10)*/)
+      audioMix.addMusicChannel(chordsStart, chordsStart + chordsFade, chordsFilter, 0.15 /*decibelsToAmplitude(-16.5)*/, 0.31 /*decibelsToAmplitude(-10)*/)
 
       const leadsFilter = createBiquadFilter('lowpass', 5000)
 
       lead1Channel.connect(leadsFilter)
       lead2Channel.connect(leadsFilter)
 
-      audioMix.addMusicChannel(75, 77, leadsFilter, 0.05 /*decibelsToAmplitude(-26)*/, 1 /*decibelsToAmplitude(0)*/)
+      audioMix.addMusicChannel(leadsStart, leadsStart + leadsFade, leadsFilter, 0.05 /*decibelsToAmplitude(-26)*/, 1 /*decibelsToAmplitude(0)*/)
     }
   }
 }

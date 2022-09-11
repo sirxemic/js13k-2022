@@ -1,7 +1,7 @@
-import { displacementNoise, getImageDataFromSvgCode, radialGradient, svg } from '../svg.js'
-import { Texture } from '../core/graphics/Texture.js'
-import { gl } from '../core/context.js'
-import { saturate } from '../math/math.js'
+import { displacementNoise, getImageDataFromSvgCode, radialGradient, svg } from '../../svg.js'
+import { Texture } from '../../core/graphics/Texture.js'
+import { gl } from '../../core/context.js'
+import { saturate } from '../../math/math.js'
 
 export let galaxyTexture
 

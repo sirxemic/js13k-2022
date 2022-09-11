@@ -1,4 +1,4 @@
-import { VertexBuffer } from '../core/graphics/VertexBuffer.js'
+import { VertexBuffer } from '../../core/graphics/VertexBuffer.js'
 
 export const skyGeometry = new VertexBuffer()
 skyGeometry.vertexLayout([3])

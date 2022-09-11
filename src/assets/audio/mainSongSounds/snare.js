@@ -1,5 +1,5 @@
-import { applyEnvelope, generateSound, sampleNoise, sampleSkewedSine, } from '../../audio/utils.js'
-import { EnvelopeSampler } from '../../utils.js'
+import { applyEnvelope, generateSound, sampleNoise, sampleSkewedSine, } from '../../../audio/utils.js'
+import { EnvelopeSampler } from '../../../utils.js'
 
 export function snare (freq, duration, volume) {
   let ampEnvelope = [

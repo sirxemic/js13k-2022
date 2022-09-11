@@ -24,6 +24,10 @@ class Track {
     this.space = new KdTreeSpace(this.points)
   }
 
+  getLastPoint () {
+    return this.points.at(-1).spacePosition
+  }
+
   // <debug>
   getPointsData () {
     const result = []
@@ -39,74 +43,76 @@ class Track {
   // </debug>
 
   getDistanceAndDirection (pos) {
-    let minDist = 1000
+    const [{ i }, _] = this.space.getClosestPoint(pos)
 
-    let closestDir
-    let closestPoint
-    let progress = 0
+    let point0 = this.points[i - 1]?.spacePosition
+    let point1 = this.points[i].spacePosition
+    let point2 = this.points[i + 1]?.spacePosition
 
-    for (const [{ i }, _] of this.space.getClosestPoints(pos, 1, VIEW_DISTANCE)) {
-      let point0 = this.points[i - 1]?.spacePosition
-      let point1 = this.points[i].spacePosition
-      let point2 = this.points[i + 1]?.spacePosition
+    let diff1
+    let diff2
 
-      let diff1
-      let diff2
-
-      if (!point0) {
-        diff1 = diff2 = subtract(vec3(), point2, point1)
-        point0 = addScaled(vec3(), point1, diff1, -20)
-      } else  if (!point2) {
-        diff1 = diff2 = subtract(vec3(), point1, point0)
-        point2 = addScaled(vec3(), point1, diff1, 20)
-      } else {
-        diff1 = subtract(vec3(), point1, point0)
-        diff2 = subtract(vec3(), point2, point1)
-      }
-
-      const diff1Length = length(diff1)
-      const diff2Length = length(diff2)
-
-      vec3Normalize(diff1)
-      vec3Normalize(diff2)
-
-      const posRelativeTo1 = subtract(vec3(), pos, point1)
-
-      const projection1 = project(vec3(), subtract(vec3(), pos, point0), diff1)
-      const projection2 = project(vec3(), posRelativeTo1, diff2)
-
-      const p1Length = length(projection1)
-      const p2Length = length(projection2)
-
-      add(projection1, projection1, point0)
-      add(projection2, projection2, point1)
-
-      const dist1 = distance(projection1, pos)
-      const dist2 = distance(projection2, pos)
-      const dist3 = distance(point1, pos)
-
-      if (dist1 < minDist) {
-        minDist = dist1
-        closestDir = diff1
-        closestPoint = projection1
-        progress = i - 1 + p1Length / diff1Length
-      }
-      if (dist2 < minDist) {
-        minDist = dist2
-        closestDir = diff2
-        closestPoint = projection2
-        progress = i + p2Length / diff2Length
-      }
-      if (dist3 < minDist) {
-        minDist = dist3
-        closestPoint = point1
-        const cornerNormal = cross(vec3(), diff1, diff2)
-        closestDir = vec3Normalize(cross(vec3(), posRelativeTo1, cornerNormal))
-        progress = i
-      }
+    if (!point0) {
+      diff1 = diff2 = subtract(vec3(), point2, point1)
+      point0 = addScaled(vec3(), point1, diff1, -20)
+    } else if (!point2) {
+      diff1 = diff2 = subtract(vec3(), point1, point0)
+    } else {
+      diff1 = subtract(vec3(), point1, point0)
+      diff2 = subtract(vec3(), point2, point1)
     }
 
-    return [minDist, closestPoint, closestDir || vec3(), progress / (this.points.length - 1)]
+    const diff1Length = length(diff1)
+    const diff2Length = length(diff2)
+
+    vec3Normalize(diff1)
+    vec3Normalize(diff2)
+
+    const posRelativeTo1 = subtract(vec3(), pos, point1)
+
+    const projection1 = project(vec3(), subtract(vec3(), pos, point0), diff1)
+    const projection2 = project(vec3(), posRelativeTo1, diff2)
+
+    const p1Length = length(projection1)
+    const p2Length = length(projection2)
+
+    add(projection1, projection1, point0)
+    add(projection2, projection2, point1)
+
+    const dist1 = distance(projection1, pos)
+    const dist2 = distance(projection2, pos)
+    const dist3 = distance(point1, pos)
+
+    let minDist = dist1
+    let closestDir = diff1
+    let closestPoint = projection1
+    let progress = Math.max(0, i - 1 + p1Length / diff1Length)
+
+    if (dist2 < minDist) {
+      minDist = dist2
+      closestDir = diff2
+      closestPoint = projection2
+      progress = i + p2Length / diff2Length
+    }
+
+    if (dist3 < minDist) {
+      minDist = dist3
+      closestPoint = point1
+      const cornerNormal = cross(vec3(), diff1, diff2)
+      closestDir = length(cornerNormal) > 0 ? vec3Normalize(cross(vec3(), posRelativeTo1, cornerNormal)) : diff1
+      progress = i
+    }
+
+    if (isNaN(minDist) || isNaN(closestPoint[0]) || isNaN(closestDir[0])) {
+      throw new Error('wtf')
+    }
+
+    return [
+      minDist,
+      closestPoint,
+      closestDir,
+      progress / (this.points.length - 1)
+    ]
   }
 }
 
@@ -122,16 +128,17 @@ export const mainTrack = new Track()
 
 mainTrack.addPoint(vec3())
 
-const mainTrackEndingLength = 100 * SCALE
-const segments = 1000
-const endingSegmentsCount = Math.ceil(mainTrackEndingLength / TRACK_SEGMENT_LENGTH)
-export const mainTrackEndingStart = 100 * (1 - endingSegmentsCount * 0.9 / (segments - 1))
+const startSegmentCount = 15
+const mainSegmentCount = 1000
+const endSegmentCount = 50
+const totalSegmentCount = startSegmentCount + mainSegmentCount + endSegmentCount
+export const mainTrackEndingStart = 100 * ((totalSegmentCount - endSegmentCount / 2) / totalSegmentCount)
 
 let startDirection = vec3([0, 0, -1])
 let direction = vec3(startDirection)
 let directionTo = vec3([0, 0, -1])
-for (let i = 0; i < segments; i++) {
-  if (i >= 15 && i < (segments - endingSegmentsCount - 1) && distance(direction, directionTo) < 0.1) {
+for (let i = 0; i < totalSegmentCount; i++) {
+  if (i >= startSegmentCount && i < (mainSegmentCount - endSegmentCount) && distance(direction, directionTo) < 0.1) {
     directionTo[0] += Math.random() - 0.5
     directionTo[1] += Math.random() - 0.5
     directionTo[2] += Math.random() - 0.5

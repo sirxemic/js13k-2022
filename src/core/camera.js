@@ -2,6 +2,9 @@ import { mat4, mat4Invert, setRotMatFromQuat } from '../math/mat4.js'
 import { vec3, vec3Normalize } from '../math/vec3.js'
 import { quat, quatInvert, quatMultiply, setFromUnitVectors } from '../math/quat.js'
 
+export const depthNear = 10
+export const depthFar = 2000
+
 export const head = {
   position: vec3(),
   quaternion: quat(),

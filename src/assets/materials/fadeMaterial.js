@@ -1,5 +1,5 @@
-import { Material } from '../core/graphics/Material.js'
-import { attributePosition, uniformColor } from '../core/constants.js'
+import { Material } from '../../core/graphics/Material.js'
+import { attributePosition, uniformColor } from '../../core/constants.js'
 
 export let fadeMaterial
 

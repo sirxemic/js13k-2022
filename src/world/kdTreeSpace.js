@@ -27,14 +27,14 @@ export class KdTreeSpace {
     this.root = buildTree([...data], 0, null)
   }
 
-  getClosestPoints (point, maxNodes, maxDistance) {
+  getClosestPoint (point) {
     const bestNodes = new BinaryHeap(e => -e[1])
+
+    bestNodes.push([null, Infinity])
 
     const saveNode = (node, distance) => {
       bestNodes.push([node, distance])
-      if (bestNodes.size() > maxNodes) {
-        bestNodes.pop()
-      }
+      bestNodes.pop()
     }
 
     const nearestSearch = (node) => {
@@ -51,7 +51,7 @@ export class KdTreeSpace {
 
       const linearDistance = distance(linearPoint, node.obj.spacePosition)
       if (!node.right && !node.left) {
-        if (bestNodes.size() < maxNodes || ownDistance < bestNodes.peek()[1]) {
+        if (ownDistance < bestNodes.peek()[1]) {
           saveNode(node, ownDistance)
         }
         return
@@ -70,11 +70,11 @@ export class KdTreeSpace {
 
       nearestSearch(bestChild)
 
-      if (bestNodes.size() < maxNodes || ownDistance < bestNodes.peek()[1]) {
+      if (ownDistance < bestNodes.peek()[1]) {
         saveNode(node, ownDistance)
       }
 
-      if (bestNodes.size() < maxNodes || Math.abs(linearDistance) < bestNodes.peek()[1]) {
+      if (Math.abs(linearDistance) < bestNodes.peek()[1]) {
         let otherChild = bestChild === node.left ? node.right : node.left
 
         if (otherChild) {
@@ -83,20 +83,9 @@ export class KdTreeSpace {
       }
     }
 
-    for (let i = 0; i < maxNodes; i += 1) {
-      bestNodes.push([null, maxDistance])
-    }
-
     nearestSearch(this.root)
 
-    const result = []
-    for (let i = 0; i < Math.min(maxNodes, bestNodes.content.length); i++) {
-      if (bestNodes.content[i][0]) {
-        result.push([bestNodes.content[i][0].obj, bestNodes.content[i][1]])
-      }
-    }
-
-    return result
+    return [bestNodes.content[0][0].obj, bestNodes.content[0][1]]
   }
 }
 

@@ -1,5 +1,5 @@
-import { applyEnvelope, generateSound, getFrequencyDelta } from '../../audio/utils.js'
-import { EnvelopeSampler } from '../../utils.js'
+import { applyEnvelope, generateSound, getFrequencyDelta } from '../../../audio/utils.js'
+import { EnvelopeSampler } from '../../../utils.js'
 
 export function kick () {
   let p = 0

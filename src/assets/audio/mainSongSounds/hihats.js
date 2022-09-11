@@ -1,4 +1,4 @@
-import { applyEnvelope, generateSound, sampleNoise } from '../../audio/utils.js'
+import { applyEnvelope, generateSound, sampleNoise } from '../../../audio/utils.js'
 
 export function hihat (freq, duration, volume) {
   let ampEnvelope = [

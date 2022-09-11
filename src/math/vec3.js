@@ -58,9 +58,9 @@ export function vec3Normalize (target, vec = target) {
 }
 
 export function cross (target, v1, v2) {
-  target[0] = v1[1] * v2[2] - v2[2] * v1[1]
-  target[1] = v1[2] * v2[0] - v2[0] * v1[2]
-  target[2] = v1[0] * v2[1] - v2[1] * v1[0]
+  target[0] = v1[1] * v2[2] - v1[2] * v2[1]
+  target[1] = v1[2] * v2[0] - v1[0] * v2[2]
+  target[2] = v1[0] * v2[1] - v1[1] * v2[0]
   return target
 }
 

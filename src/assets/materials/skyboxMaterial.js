@@ -1,14 +1,14 @@
-import { Material } from '../core/graphics/Material.js'
+import { Material } from '../../core/graphics/Material.js'
 import {
-  uniformCameraPosition, uniformFocusAmount,
+  uniformCameraPosition, uniformChannelCount, uniformFocusAmount,
   uniformHeadPosition,
   uniformKick,
   uniformSnare,
   uniformTextures,
   uniformTime,
   varyingPosition
-} from '../core/constants.js'
-import { noiseTexture } from './noise.js'
+} from '../../core/constants.js'
+import { noiseTexture } from '../textures/noise.js'
 
 export let skyboxMaterial
 
@@ -21,6 +21,7 @@ export function loadSkyboxMaterial () {
   uniform float ${uniformKick};
   uniform float ${uniformSnare};
   uniform float ${uniformFocusAmount};
+  uniform float ${uniformChannelCount};
 
 #define LAYERS            4.0
 
@@ -101,8 +102,8 @@ vec3 color(vec3 rd, vec3 lp, vec4 md) {
   float cf = 0.0;
   vec3 col = vec3(0.0);
 
-  col += sky(rd, sp) * min(1.0, ${uniformFocusAmount});
-  col += stars(rd, sp) * (0.1 + ${uniformKick});
+  col += sky(rd, sp) * min(1.0, ${uniformFocusAmount}) * min(1.0, ${uniformChannelCount});
+  col += stars(rd, sp) * (0.1 + ${uniformSnare});
 
   return col;
 }

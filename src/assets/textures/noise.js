@@ -1,4 +1,4 @@
-import { Texture } from '../core/graphics/Texture.js'
+import { Texture } from '../../core/graphics/Texture.js'
 
 export let noiseTexture
 
