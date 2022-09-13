@@ -246,7 +246,7 @@ export function renderWorld () {
 
   const distanceToEnd = distance(head.position, mainTrack.getLastPoint())
 
-  const endSize = saturate(0.01 * (VIEW_DISTANCE * 2 - distanceToEnd))
+  const endSize = progress > 90 ? saturate(0.01 * (VIEW_DISTANCE * 2 - distanceToEnd)) : 0
   goalMaterial.shader.set1f(uniformEndSizeInverse, 1 / endSize)
   draw(quad, goalMaterial)
 
