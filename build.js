@@ -9,6 +9,6 @@ build({
 
   // Hack: undo some renaming :P
   fixAfterHtmlMinify (html) {
-    return html.replace('orientation||0', 'window.orientation||screen.orientation.angle||0')
+    return html
   }
 })
