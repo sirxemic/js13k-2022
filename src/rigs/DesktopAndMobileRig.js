@@ -44,12 +44,12 @@ export const desktopAndMobileRig = {
     if (window.DeviceOrientationEvent && window.DeviceOrientationEvent.requestPermission) {
       await window.DeviceOrientationEvent.requestPermission()
 
-      document.body.addEventListener('touchstart', desktopAndMobileRig.onTouchStart)
-      document.body.addEventListener('touchmove', desktopAndMobileRig.onTouchMove)
-      document.body.addEventListener('touchend', desktopAndMobileRig.onTouchEnd)
-
       window.addEventListener('deviceorientation', desktopAndMobileRig.onDeviceOrientationChange, false)
     }
+
+    document.body.addEventListener('touchstart', desktopAndMobileRig.onTouchStart)
+    document.body.addEventListener('touchmove', desktopAndMobileRig.onTouchMove)
+    document.body.addEventListener('touchend', desktopAndMobileRig.onTouchEnd)
   },
 
   pauseControls () {
