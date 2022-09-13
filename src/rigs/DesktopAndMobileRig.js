@@ -43,9 +43,9 @@ export const desktopAndMobileRig = {
 
     if (window.DeviceOrientationEvent && window.DeviceOrientationEvent.requestPermission) {
       await window.DeviceOrientationEvent.requestPermission()
-
-      window.addEventListener('deviceorientation', desktopAndMobileRig.onDeviceOrientationChange, false)
     }
+
+    window.addEventListener('deviceorientation', desktopAndMobileRig.onDeviceOrientationChange, false)
 
     document.body.addEventListener('touchstart', desktopAndMobileRig.onTouchStart)
     document.body.addEventListener('touchmove', desktopAndMobileRig.onTouchMove)
